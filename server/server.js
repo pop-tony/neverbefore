@@ -11,8 +11,10 @@ import fs from "fs";
 import productRouter from "./routes/productRoutes.js";
 import orderRouter from "./routes/orderRoutes.js";
 import contentRouter from "./routes/contentRoutes.js";
+import adminRouter from "./routes/adminRoutes.js";
 import { connect } from 'http2';
 import { logError, logInfo } from './utils/logger.js';
+import adminProductRouter from "./routes/adminProductRoutes.js";
 
 //Create Express app and HTTP  server
 const app = express();
@@ -23,7 +25,7 @@ app.use(express.json({ limit: '50mb' }));
 app.use(cookieParser());
 // Allow requests from a specific origin
 app.use(cors({
-  origin: ['https://prissaura.vercel.app', 'http://localhost:5175', 'http://localhost:5174', 'http://localhost:5173', 'http://192.168.1.169:5173',],
+  origin: ['https://neverbeforecosmetics.vercel.app', 'http://localhost:5175', 'http://localhost:5174', 'http://localhost:5173', 'http://192.168.1.169:5173',],
   credentials: true,
   allowedHeaders: ['Content-Type', 'Authorization', 'token']
 }));
@@ -35,6 +37,8 @@ app.use('/api/user', userRouter);
 app.use('/api/product', productRouter);
 app.use('/api/order', orderRouter);
 app.use('/api/content', contentRouter);
+app.use('/api/admin', adminRouter);
+app.use('/api/admin', adminProductRouter);
 
 await connectDB();
 
@@ -49,7 +53,6 @@ app.use((err, req, res, next) => {
         path: req.originalUrl,
         ip: req.ip,
     });
-
     res.status(err.status || 500).json({ success: false, message: err.message || 'Internal Server Error' });
 });
 

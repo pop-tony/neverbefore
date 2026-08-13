@@ -8,13 +8,11 @@ const productRouter = express.Router();
 
 productRouter.get('/products', getProductData);
 productRouter.get('/products/:id', getProductData);
-productRouter.post('/products', userAuth, createProduct);
-productRouter.put('/products/:id', userAuth, updateProduct);
-productRouter.delete('/products/:id', userAuth, deleteProduct);
+// Admin-protected product management endpoints
+// Public product endpoints (read-only). Admin actions moved to /api/admin/products
+productRouter.get('/products', getProductData);
+productRouter.get('/products/:id', getProductData);
 
 productRouter.get('/data', getProductData);
-productRouter.post('/create-product', createProduct);
-productRouter.put('/update-product', updateProduct);
-productRouter.post('/delete-product', deleteProduct);
 
 export default productRouter;

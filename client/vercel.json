@@ -2,7 +2,7 @@
   "rewrites": [
     { 
       "source": "/api/:path*", 
-      "destination": "https://neverbefore-backend.vercel.app/api/:path*" 
+      "destination": "https://mizj-boutique-backend.vercel.app/api/:path*" 
     },
     {
       "source": "/(.*)",

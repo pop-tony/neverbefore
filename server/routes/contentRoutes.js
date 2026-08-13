@@ -1,10 +1,11 @@
 import express from 'express';
-import userAuth from '../middleware/userAuth.js';
+import adminAuth from '../middleware/adminAuth.js';
 import { getSiteContent, updateSiteContent } from '../controllers/contentController.js';
 
 const contentRouter = express.Router();
 
 contentRouter.get('/site-content', getSiteContent);
-contentRouter.put('/site-content', userAuth, updateSiteContent);
+// Only admins can update site content
+contentRouter.put('/site-content', adminAuth, updateSiteContent);
 
 export default contentRouter;

@@ -10,6 +10,7 @@ const buildUserResponse = (user) => ({
     email: user.email,
     full_name: user.name,
     role: user.isAdmin ? 'admin' : 'customer',
+    isAdmin: Boolean(user.isAdmin),
 });
 
 const buildToken = (user) => jwt.sign(
