@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import { contentApi, type SiteContent } from './api';
+import { contentApi } from './api';
 
 const DEFAULT_CATEGORY_IMAGE = '/WhatsApp_Image_2026-07-06_at_12.02.55_PM.jpeg';
 
-export const DEFAULT_SITE_CONTENT: SiteContent = {
+export const DEFAULT_SITE_CONTENT = {
   _id: '',
   key: 'primary',
   brand_name: 'Never Before Cosmetics',
@@ -39,19 +39,19 @@ export const DEFAULT_SITE_CONTENT: SiteContent = {
   categories: [],
 };
 
-export const normalizeSiteContent = (content?: Partial<SiteContent> | null): SiteContent => ({
+export const normalizeSiteContent = (content) => ({
   ...DEFAULT_SITE_CONTENT,
   ...(content ?? {}),
   hero_images: content?.hero_images?.filter(Boolean) ?? DEFAULT_SITE_CONTENT.hero_images,
   categories: content?.categories?.filter(Boolean) ?? DEFAULT_SITE_CONTENT.categories,
 });
 
-export const getCategoryImage = (content: SiteContent, category: string) => {
+export const getCategoryImage = (content, category) => {
   return content.categories.find((item) => item.name === category)?.image_url || content.hero_images[0] || DEFAULT_CATEGORY_IMAGE;
 };
 
 export function useSiteContent() {
-  const [content, setContent] = useState<SiteContent>(DEFAULT_SITE_CONTENT);
+  const [content, setContent] = useState(DEFAULT_SITE_CONTENT);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

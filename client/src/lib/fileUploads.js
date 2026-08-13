@@ -1,4 +1,4 @@
-export async function fileToDataUrl(file: File): Promise<string> {
+export async function fileToDataUrl(file) {
   return await new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(String(reader.result || ''));

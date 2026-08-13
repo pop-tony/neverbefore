@@ -43,7 +43,7 @@ function Navbar() {
   const [cartOpen, setCartOpen] = useState(false);
   const { user, signOut, isAdmin } = useAuth();
   const navigate = useNavigate();
-  const menuRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef(null);
   const { content } = useSiteContent();
 
   const desktopLinks = [
@@ -69,8 +69,8 @@ function Navbar() {
 
   useEffect(() => {
     if (!menuOpen) return;
-    const handleClickOutside = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+    const handleClickOutside = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
         setMenuOpen(false);
       }
     };
@@ -78,7 +78,7 @@ function Navbar() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [menuOpen]);
 
-  const handleMenuItemClick = (item: typeof menuItems[0]) => {
+  const handleMenuItemClick = (item) => {
     setMenuOpen(false);
     if (item.action) item.action();
   };
