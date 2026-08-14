@@ -56,7 +56,8 @@ export default function OrderDetails() {
   const [notifPermission, setNotifPermission] = useState('default');
   const pollInterval = useRef(null);
 
-  const backendUrl = import.meta.env.VITE_ENV === "development"? import.meta.env.VITE_BACKEND_URL : "/api";
+  const configuredBase = (import.meta.env.VITE_BACKEND_URL || '/api').replace(/\/+$/, '');
+  const backendUrl = configuredBase.endsWith('/api') ? configuredBase : `${configuredBase}/api`;
 
   useEffect(() => {
     if ('Notification' in window) {

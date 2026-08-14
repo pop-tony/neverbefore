@@ -19,7 +19,8 @@ export const Reservation = () => {
 
   const next7Days = Array.from({ length: 7 }, (_, i) => addDays(new Date(), i));
   const key = import.meta.env.VITE_PAYSTACK_LIVE_PUBLIC_KEY;
-  const backendUrl = import.meta.env.VITE_ENV === "development" ? import.meta.env.VITE_BACKEND_URL : "/api";
+  const configuredBase = (import.meta.env.VITE_BACKEND_URL || '/api').replace(/\/+$/, '');
+  const backendUrl = configuredBase.endsWith('/api') ? configuredBase : `${configuredBase}/api`;
 
   useEffect(() => {
     const handleEsc = (e) => e.key === 'Escape' && closeModal()

@@ -20,9 +20,46 @@ import adminProductRouter from "./routes/adminProductRoutes.js";
 const app = express();
 const server = http.createServer(app);
 
+const shouldLogRequest = (req) => {
+    const importantRoutes = ['/api/auth', '/api/admin', '/api/order', '/api/product', '/api/content', '/api/user'];
+    return importantRoutes.some((route) => req.originalUrl === route || req.originalUrl.startsWith(`${route}/`));
+};
+
 //Middleware setup
 app.use(express.json({ limit: '50mb' }));
 app.use(cookieParser());
+app.use((req, res, next) => {
+    const startedAt = Date.now();
+    const shouldLog = shouldLogRequest(req);
+
+    if (shouldLog) {
+        logInfo('Incoming API request', {
+            method: req.method,
+            path: req.originalUrl,
+            ip: req.ip,
+        });
+    }
+
+    res.on('finish', () => {
+        if (!shouldLog) return;
+
+        const context = {
+            method: req.method,
+            path: req.originalUrl,
+            status: res.statusCode,
+            durationMs: Date.now() - startedAt,
+            ip: req.ip,
+        };
+
+        if (res.statusCode >= 400) {
+            logError('API request completed with error', new Error(`HTTP ${res.statusCode}`), context);
+        } else {
+            logInfo('API request completed', context);
+        }
+    });
+
+    next();
+});
 // Allow requests from a specific origin
 app.use(cors({
   origin: ['https://neverbeforecosmetics.vercel.app', 'http://localhost:5175', 'http://localhost:5174', 'http://localhost:5173', 'http://192.168.1.169:5173',],

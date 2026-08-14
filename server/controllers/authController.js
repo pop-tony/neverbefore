@@ -7,10 +7,14 @@ import { logError, logInfo } from '../utils/logger.js';
 
 const buildUserResponse = (user) => ({
     id: user._id.toString(),
+    name: user.name,
+    username: user.username || (user.email ? user.email.split('@')[0] : 'user'),
     email: user.email,
+    number: user.number,
     full_name: user.name,
     role: user.isAdmin ? 'admin' : 'customer',
     isAdmin: Boolean(user.isAdmin),
+    createdAt: user.createdAt,
 });
 
 const buildToken = (user) => jwt.sign(
@@ -54,6 +58,12 @@ export const register = async (req, res)=>{
             secure: process.env.NODE_ENV === 'production',
             sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
             maxAge: 7 * 24 * 60 * 60 * 1000
+        });
+
+        logInfo('User registered successfully', {
+            email,
+            userId: user._id.toString(),
+            path: req.originalUrl,
         });
 
         //Sending welcome email
@@ -104,6 +114,12 @@ export const login = async (req, res)=>{
             maxAge: 7 * 24 * 60 * 60 * 1000
         });
 
+        logInfo('User login successful', {
+            email,
+            userId: user._id.toString(),
+            path: req.originalUrl,
+        });
+
         return res.json({success: true, token, user: buildUserResponse(user)});
 
     }catch(error){
@@ -120,6 +136,12 @@ export const logout = async (req, res)=>{
             secure: process.env.NODE_ENV === 'production',
             sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
         })
+
+        logInfo('User logout successful', {
+            userId: req.user?.id,
+            email: req.user?.email,
+            path: req.originalUrl,
+        });
 
         return res.json({success: true, message: 'Logged Out'});
 

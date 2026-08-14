@@ -1,43 +1,46 @@
-import React from 'react'
-import HeroSection from '../components/HeroSection'
-import ShopSection from '../components/ShopSection'
-import StyleCarousel from '../components/StyleCarousel'
+import React from 'react';
+import HeroSection from '../components/HeroSection';
+import ShopSection from '../components/ShopSection';
+import StyleCarousel from '../components/StyleCarousel';
+import { Sparkles, ShieldCheck, Truck, Star } from 'lucide-react';
+import { useSiteContent } from '../hooks/useSiteContent';
 
 const Home = () => {
+  const { content } = useSiteContent();
+
   return (
     <>
       <HeroSection />
 
-      <section id="about" className="bg-white px-4 py-24 text-zinc-900 dark:bg-black dark:text-white">
-        <div className="mx-auto max-w-4xl text-center">
-          {/* Gold luxury divider */}
-          <div className="mx-auto mb-8 h- w-20 bg-gradient-to-r from-[#C5A059] to-[#E8D5B5]"></div>
+      <section id="about" className="bg-[#FBF8F4] px-4 py-20 text-zinc-900 dark:bg-[#09090B] dark:text-white">
+        <div className="mx-auto max-w-5xl text-center">
+          <div className="mx-auto mb-8 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-r from-[#C5A059] to-[#E8D5B5] text-white shadow-[0_20px_40px_rgba(197,160,89,0.3)]">
+            <Sparkles className="h-7 w-7" />
+          </div>
 
-          <h2 className="mb-6 text-4xl font-light tracking-[0.15em] uppercase">
-            Why Shop <span className="font-serif font-bold normal-case tracking-tight text-[#C5A059]">Never Before Cosmetic</span>
+          <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-[#C5A059]">Why choose us</p>
+          <h2 className="mt-4 text-3xl font-black tracking-[-0.04em] sm:text-5xl">
+            Beauty routines designed for the modern muse.
           </h2>
 
-          <p className="mx-auto max-w-2xl text-lg leading-relaxed text-zinc-600 dark:text-zinc-300">
-            We curate gold-standard formulas for the modern muse across Ghana.
-            From luminous serums to velvet lip pigments, find rituals never seen before.
-            Clean, potent, and made to reveal your most radiant self.
+          <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-zinc-600 dark:text-zinc-300">
+            {content?.brand_tagline || 'We curate gold-standard formulas for the modern muse across Ghana.'}
           </p>
 
-          <div className="mt-16 flex justify-between items-center border-y border-[#F5EFE6] py-10">
-            <div className="flex-1">
-              <div className="mb-2 text-4xl font-serif font-light text-[#C5A059]">500+</div>
-              <p className="text-xs font-semibold tracking-[0.2em] uppercase text-zinc-500">Clean Formulas</p>
-            </div>
-            <div className="w- h-12 bg-[#F5EFE6]"></div>
-            <div className="flex-1">
-              <div className="mb-2 text-4xl font-serif font-light text-[#C5A059]">2k+</div>
-              <p className="text-xs font-semibold tracking-[0.2em] uppercase text-zinc-500">Glowing Muses</p>
-            </div>
-            <div className="w- h-12 bg-[#F5EFE6]"></div>
-            <div className="flex-1">
-              <div className="mb-2 text-4xl font-serif font-light text-[#C5A059]">48hr</div>
-              <p className="text-xs font-semibold tracking-[0.2em] uppercase text-zinc-500">Fast Delivery</p>
-            </div>
+          <div className="mt-16 grid gap-5 md:grid-cols-3">
+            {[
+              { icon: ShieldCheck, label: 'Clean formulas', value: '500+' },
+              { icon: Star, label: 'Glow reviews', value: '2k+' },
+              { icon: Truck, label: 'Fast delivery', value: '48hr' },
+            ].map(({ icon: Icon, label, value }) => (
+              <div key={label} className="soft-card rounded-[28px] border border-[#F0E7DA] bg-white p-6 text-left dark:border-zinc-800 dark:bg-zinc-900">
+                <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#F5E7C8] text-[#8E6E3A] dark:bg-[#1C1917] dark:text-[#E8D29E]">
+                  <Icon className="h-5 w-5" />
+                </div>
+                <div className="text-4xl font-black tracking-[-0.06em] text-[#C5A059]">{value}</div>
+                <p className="mt-2 text-xs font-bold uppercase tracking-[0.22em] text-zinc-500 dark:text-zinc-400">{label}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -45,7 +48,7 @@ const Home = () => {
       <ShopSection />
       <StyleCarousel />
     </>
-  )
-}
+  );
+};
 
 export default Home

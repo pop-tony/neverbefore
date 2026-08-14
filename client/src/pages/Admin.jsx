@@ -5,6 +5,8 @@ import { toast } from 'sonner';
 import { MapPin, Phone, Mail, Calendar, CreditCard, Package, Truck, CheckCircle, Clock, AlertCircle, RefreshCw, ShoppingBag, XCircle, RotateCcw, Search, ChevronDown, ChevronUp, X, Plus, Trash2, Edit } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+const formatCurrency = (value) => `₵${Number(value ?? 0).toLocaleString()}`;
+
 const StatCard = ({ title, value, change, icon, color }) => {
   const isPositive = change >= 0;
   const changeColor = isPositive? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400';
@@ -116,8 +118,18 @@ export const Admin = () => {
     image: null, video: null, imagePreview: null, featured: false, topSell: false
   });
 
-  const backendUrl = import.meta.env.VITE_ENV === "development"? import.meta.env.VITE_BACKEND_URL : "/api";
+  const configuredBase = (import.meta.env.VITE_BACKEND_URL || '/api').replace(/\/+$/, '');
+  const backendUrl = configuredBase.endsWith('/api') ? configuredBase : `${configuredBase}/api`;
   const [siteContent, setSiteContent] = useState(null);
+  const [settingsSection, setSettingsSection] = useState('brand');
+
+  const settingSections = [
+    { id: 'brand', label: 'Brand & home', description: 'Hero and identity' },
+    { id: 'shop', label: 'Shop', description: 'Catalog and categories' },
+    { id: 'contact', label: 'Contact', description: 'Support and footer' },
+    { id: 'pages', label: 'Navigation', description: 'Labels and menus' },
+    { id: 'access', label: 'Access', description: 'Admin messaging' },
+  ];
   
   // Fetch products
   const fetchProducts = async () => {
@@ -491,6 +503,7 @@ export const Admin = () => {
 
   const tabs = [
     { id: 'overview', label: 'Overview', icon: '📊' },
+    { id: 'site-settings', label: 'Site Settings', icon: '⚙️' },
     { id: 'products', label: 'Products', icon: '📦' },
     { id: 'orders', label: 'Orders', icon: '🛍' },
     { id: 'sessions', label: 'Enquiries', icon: '✨' },
@@ -713,11 +726,11 @@ export const Admin = () => {
                                 {/* Price */}
                                 <div className="flex items-baseline gap-2 pt-1">
                                   <span className="text-lg font-black text-[#C5A059]">
-                                    ₵{((item.price || order.total / items.length) * (item.quantity || 1)).toLocaleString()}
+                                    {formatCurrency((item.price || order.total / items.length) * (item.quantity || 1))}
                                   </span>
                                   {item.quantity > 1 && (
                                     <span className="text-xs text-zinc-500 dark:text-zinc-400">
-                                      (₵{(item.price || order.total / items.length).toLocaleString()} each)
+                                      ({formatCurrency(item.price || order.total / items.length)} each)
                                     </span>
                                   )}
                                 </div>
@@ -736,14 +749,14 @@ export const Admin = () => {
                           <div className="flex justify-between text-sm">
                             <span className="text-zinc-600 dark:text-zinc-400">Subtotal</span>
                             <span className="font-semibold text-zinc-900 dark:text-white">
-                              ₵{order.subtotal?.toLocaleString() || order.total?.toLocaleString()}
+                              {formatCurrency(order.subtotal ?? order.total)}
                             </span>
                           </div>
                           {order.shipping > 0 && (
                             <div className="flex justify-between text-sm">
                               <span className="text-zinc-600 dark:text-zinc-400">Shipping</span>
                               <span className="font-semibold text-zinc-900 dark:text-white">
-                                ₵{order.shipping.toLocaleString()}
+                                {formatCurrency(order.shipping)}
                               </span>
                             </div>
                           )}
@@ -751,7 +764,7 @@ export const Admin = () => {
                             <div className="flex justify-between text-sm">
                               <span className="text-zinc-600 dark:text-zinc-400">Discount</span>
                               <span className="font-semibold text-green-600 dark:text-green-400">
-                                -₵{order.discount.toLocaleString()}
+                                -{formatCurrency(order.discount)}
                               </span>
                             </div>
                           )}
@@ -759,7 +772,7 @@ export const Admin = () => {
                             <div className="flex justify-between">
                               <span className="text-base font-bold text-zinc-900 dark:text-white">Total</span>
                               <span className="text-2xl font-black text-rose-500">
-                                ₵{order.total?.toLocaleString()}
+                                {formatCurrency(order.total)}
                               </span>
                             </div>
                           </div>
@@ -871,26 +884,56 @@ export const Admin = () => {
         {/* Overview Tab */}
         {activeTab === 'overview' && (
           <div className="space-y-8">
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            <div className="rounded-3xl border border-zinc-200 bg-gradient-to-r from-[#F6EAD2] via-white to-[#FBF7F2] p-6 shadow-sm dark:border-zinc-800 dark:from-[#1D1D1B] dark:via-[#151515] dark:to-[#111827]">
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.32em] text-[#C5A059]">Performance overview</p>
+                  <h2 className="mt-3 text-3xl font-black text-zinc-900 dark:text-white">Admin Dashboard</h2>
+                </div>
+                <div className="inline-flex items-center gap-2 rounded-full border border-[#C5A059]/30 bg-white/70 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-[#C5A059] dark:bg-zinc-900/70">
+                  <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                  Live data
+                </div>
+              </div>
+
+              <div className="mt-6 grid gap-4 md:grid-cols-3">
+                <div className="rounded-2xl border border-zinc-200 bg-white/80 p-4 shadow-sm dark:border-zinc-700 dark:bg-zinc-900/80">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">Revenue this week</p>
+                  <p className="mt-3 text-2xl font-black text-zinc-900 dark:text-white">{formatCurrency(analytics.thisWeekRevenue)}</p>
+                  <p className="mt-2 text-xs text-emerald-600 dark:text-emerald-400">+{analytics.totalRevenueChange || 0}% vs last week</p>
+                </div>
+                <div className="rounded-2xl border border-zinc-200 bg-white/80 p-4 shadow-sm dark:border-zinc-700 dark:bg-zinc-900/80">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">Active orders</p>
+                  <p className="mt-3 text-2xl font-black text-zinc-900 dark:text-white">{analytics.activeOrders}</p>
+                  <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">Processing and dispatch</p>
+                </div>
+                <div className="rounded-2xl border border-zinc-200 bg-white/80 p-4 shadow-sm dark:border-zinc-700 dark:bg-zinc-900/80">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">Customer base</p>
+                  <p className="mt-3 text-2xl font-black text-zinc-900 dark:text-white">{analytics.totalCustomers}</p>
+                  <p className="mt-2 text-xs text-violet-600 dark:text-violet-400">+{analytics.totalCustomersChange || 0}% growth</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
               <StatCard
                 title="Total Revenue"
-                value={`₵${analytics.totalRevenue.toLocaleString()}`}
-                //change={analytics.totalRevenueChange}
+                value={formatCurrency(analytics.totalRevenue)}
                 icon="💰"
                 color="bg-green-100 dark:bg-green-900/30"
               />
               <StatCard
-                title="This Week Revenue"
-                value={`₵${analytics.totalRevenue.toLocaleString()}`}
+                title="This Week"
+                value={formatCurrency(analytics.thisWeekRevenue)}
                 change={analytics.totalRevenueChange}
                 icon="📈"
                 color="bg-green-100 dark:bg-green-900/30"
               />
               <StatCard
                 title="Today's Revenue"
-                value={`₵${analytics.todayRevenue.toLocaleString()}`}
+                value={formatCurrency(analytics.todayRevenue)}
                 change={analytics.todayRevenueChange}
-                icon="📈"
+                icon="📊"
                 color="bg-blue-100 dark:bg-blue-900/30"
               />
               <StatCard
@@ -900,7 +943,7 @@ export const Admin = () => {
                 color="bg-[#C5A059]/10 dark:bg-[#C5A059]/20"
               />
               <StatCard
-                title="Total Customers"
+                title="Customers"
                 value={analytics.totalCustomers}
                 change={analytics.totalCustomersChange}
                 icon="👥"
@@ -957,6 +1000,223 @@ export const Admin = () => {
                 )}
               </div>
             </div>
+          </div>
+        )}
+
+        {/* Site Settings Tab */}
+        {activeTab === 'site-settings' && (
+          <div className="space-y-6">
+            <div className="flex flex-col gap-4 rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 lg:flex-row lg:items-center lg:justify-between">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-[0.3em] text-[#C5A059]">Brand Controls</p>
+                <h2 className="mt-2 text-3xl font-black text-zinc-900 dark:text-white">Site Settings</h2>
+              </div>
+              <button
+                onClick={saveSiteContent}
+                className="rounded-xl bg-[#C5A059] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#B08D4F]"
+              >
+                Save all changes
+              </button>
+            </div>
+
+            {!siteContent ? (
+              <div className="rounded-3xl border border-zinc-200 bg-white p-12 text-center text-zinc-500 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+                Loading site settings...
+              </div>
+            ) : (
+              <div className="grid gap-6 xl:grid-cols-[260px_minmax(0,1fr)]">
+                <aside className="rounded-3xl border border-zinc-200 bg-white p-3 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+                  <div className="mb-3 px-3 py-2">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500 dark:text-zinc-400">Sections</p>
+                  </div>
+                  <nav className="space-y-2">
+                    {settingSections.map((section) => (
+                      <button
+                        key={section.id}
+                        onClick={() => setSettingsSection(section.id)}
+                        className={`w-full rounded-2xl border px-3 py-3 text-left transition ${
+                          settingsSection === section.id
+                            ? 'border-[#C5A059]/50 bg-[#C5A059]/10 text-[#C5A059] shadow-sm'
+                            : 'border-transparent bg-zinc-50 text-zinc-600 hover:bg-zinc-100 dark:bg-zinc-800/60 dark:text-zinc-300 dark:hover:bg-zinc-800'
+                        }`}
+                      >
+                        <div className="text-sm font-bold">{section.label}</div>
+                        <div className="mt-1 text-[11px] opacity-75">{section.description}</div>
+                      </button>
+                    ))}
+                  </nav>
+                </aside>
+
+                <div className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+                  {settingsSection === 'brand' && (
+                    <div className="space-y-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#C5A059]">Brand</p>
+                          <h3 className="mt-2 text-2xl font-black text-zinc-900 dark:text-white">Identity & home banner</h3>
+                        </div>
+                        <span className="rounded-full bg-[#C5A059]/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-[#C5A059]">Live</span>
+                      </div>
+
+                      <div className="grid gap-4 md:grid-cols-2">
+                        <div className="md:col-span-2">
+                          <label className="mb-1 block text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">Brand name</label>
+                          <input value={siteContent.brand_name || ''} onChange={(e) => handleContentChange('brand_name', e.target.value)} className="w-full rounded-xl border border-zinc-300 bg-white px-3 py-3 text-sm text-zinc-900 focus:border-[#C5A059] focus:outline-none focus:ring-2 focus:ring-[#C5A059]/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white" />
+                        </div>
+                        <div className="md:col-span-2">
+                          <label className="mb-1 block text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">Brand tagline</label>
+                          <input value={siteContent.brand_tagline || ''} onChange={(e) => handleContentChange('brand_tagline', e.target.value)} className="w-full rounded-xl border border-zinc-300 bg-white px-3 py-3 text-sm text-zinc-900 focus:border-[#C5A059] focus:outline-none focus:ring-2 focus:ring-[#C5A059]/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white" />
+                        </div>
+                        <div>
+                          <label className="mb-1 block text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">Hero badge</label>
+                          <input value={siteContent.hero_badge || ''} onChange={(e) => handleContentChange('hero_badge', e.target.value)} className="w-full rounded-xl border border-zinc-300 bg-white px-3 py-3 text-sm text-zinc-900 focus:border-[#C5A059] focus:outline-none focus:ring-2 focus:ring-[#C5A059]/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white" />
+                        </div>
+                        <div>
+                          <label className="mb-1 block text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">CTA label</label>
+                          <input value={siteContent.hero_cta_label || ''} onChange={(e) => handleContentChange('hero_cta_label', e.target.value)} className="w-full rounded-xl border border-zinc-300 bg-white px-3 py-3 text-sm text-zinc-900 focus:border-[#C5A059] focus:outline-none focus:ring-2 focus:ring-[#C5A059]/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white" />
+                        </div>
+                        <div className="md:col-span-2">
+                          <label className="mb-1 block text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">Hero title</label>
+                          <input value={siteContent.hero_title || ''} onChange={(e) => handleContentChange('hero_title', e.target.value)} className="w-full rounded-xl border border-zinc-300 bg-white px-3 py-3 text-sm text-zinc-900 focus:border-[#C5A059] focus:outline-none focus:ring-2 focus:ring-[#C5A059]/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white" />
+                        </div>
+                        <div className="md:col-span-2">
+                          <label className="mb-1 block text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">Hero subtitle</label>
+                          <textarea rows={4} value={siteContent.hero_subtitle || ''} onChange={(e) => handleContentChange('hero_subtitle', e.target.value)} className="w-full rounded-xl border border-zinc-300 bg-white px-3 py-3 text-sm text-zinc-900 focus:border-[#C5A059] focus:outline-none focus:ring-2 focus:ring-[#C5A059]/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white" />
+                        </div>
+                        <div className="md:col-span-2">
+                          <label className="mb-1 block text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">CTA link</label>
+                          <input value={siteContent.hero_cta_href || ''} onChange={(e) => handleContentChange('hero_cta_href', e.target.value)} className="w-full rounded-xl border border-zinc-300 bg-white px-3 py-3 text-sm text-zinc-900 focus:border-[#C5A059] focus:outline-none focus:ring-2 focus:ring-[#C5A059]/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white" />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {settingsSection === 'shop' && (
+                    <div className="space-y-6">
+                      <div>
+                        <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#C5A059]">Shop</p>
+                        <h3 className="mt-2 text-2xl font-black text-zinc-900 dark:text-white">Catalog messaging</h3>
+                      </div>
+                      <div className="grid gap-4 md:grid-cols-2">
+                        <div className="md:col-span-2">
+                          <label className="mb-1 block text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">Shop heading</label>
+                          <input value={siteContent.shop_heading || ''} onChange={(e) => handleContentChange('shop_heading', e.target.value)} className="w-full rounded-xl border border-zinc-300 bg-white px-3 py-3 text-sm text-zinc-900 focus:border-[#C5A059] focus:outline-none focus:ring-2 focus:ring-[#C5A059]/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white" />
+                        </div>
+                        <div className="md:col-span-2">
+                          <label className="mb-1 block text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">Shop subheading</label>
+                          <input value={siteContent.shop_subheading || ''} onChange={(e) => handleContentChange('shop_subheading', e.target.value)} className="w-full rounded-xl border border-zinc-300 bg-white px-3 py-3 text-sm text-zinc-900 focus:border-[#C5A059] focus:outline-none focus:ring-2 focus:ring-[#C5A059]/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white" />
+                        </div>
+                        <div>
+                          <label className="mb-1 block text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">Category heading</label>
+                          <input value={siteContent.category_heading || ''} onChange={(e) => handleContentChange('category_heading', e.target.value)} className="w-full rounded-xl border border-zinc-300 bg-white px-3 py-3 text-sm text-zinc-900 focus:border-[#C5A059] focus:outline-none focus:ring-2 focus:ring-[#C5A059]/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white" />
+                        </div>
+                        <div>
+                          <label className="mb-1 block text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">Category subtitle</label>
+                          <input value={siteContent.category_subtitle || ''} onChange={(e) => handleContentChange('category_subtitle', e.target.value)} className="w-full rounded-xl border border-zinc-300 bg-white px-3 py-3 text-sm text-zinc-900 focus:border-[#C5A059] focus:outline-none focus:ring-2 focus:ring-[#C5A059]/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white" />
+                        </div>
+                        <div className="md:col-span-2">
+                          <label className="mb-1 block text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">Empty state title</label>
+                          <input value={siteContent.empty_title || ''} onChange={(e) => handleContentChange('empty_title', e.target.value)} className="w-full rounded-xl border border-zinc-300 bg-white px-3 py-3 text-sm text-zinc-900 focus:border-[#C5A059] focus:outline-none focus:ring-2 focus:ring-[#C5A059]/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white" />
+                        </div>
+                        <div className="md:col-span-2">
+                          <label className="mb-1 block text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">Empty state message</label>
+                          <textarea rows={3} value={siteContent.empty_message || ''} onChange={(e) => handleContentChange('empty_message', e.target.value)} className="w-full rounded-xl border border-zinc-300 bg-white px-3 py-3 text-sm text-zinc-900 focus:border-[#C5A059] focus:outline-none focus:ring-2 focus:ring-[#C5A059]/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white" />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {settingsSection === 'contact' && (
+                    <div className="space-y-6">
+                      <div>
+                        <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#C5A059]">Contact</p>
+                        <h3 className="mt-2 text-2xl font-black text-zinc-900 dark:text-white">Support & footer</h3>
+                      </div>
+                      <div className="grid gap-4 md:grid-cols-2">
+                        <div>
+                          <label className="mb-1 block text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">Support email</label>
+                          <input type="email" value={siteContent.support_email || ''} onChange={(e) => handleContentChange('support_email', e.target.value)} className="w-full rounded-xl border border-zinc-300 bg-white px-3 py-3 text-sm text-zinc-900 focus:border-[#C5A059] focus:outline-none focus:ring-2 focus:ring-[#C5A059]/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white" />
+                        </div>
+                        <div>
+                          <label className="mb-1 block text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">Support phone</label>
+                          <input value={siteContent.support_phone || ''} onChange={(e) => handleContentChange('support_phone', e.target.value)} className="w-full rounded-xl border border-zinc-300 bg-white px-3 py-3 text-sm text-zinc-900 focus:border-[#C5A059] focus:outline-none focus:ring-2 focus:ring-[#C5A059]/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white" />
+                        </div>
+                        <div className="md:col-span-2">
+                          <label className="mb-1 block text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">Contact heading</label>
+                          <input value={siteContent.contact_heading || ''} onChange={(e) => handleContentChange('contact_heading', e.target.value)} className="w-full rounded-xl border border-zinc-300 bg-white px-3 py-3 text-sm text-zinc-900 focus:border-[#C5A059] focus:outline-none focus:ring-2 focus:ring-[#C5A059]/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white" />
+                        </div>
+                        <div className="md:col-span-2">
+                          <label className="mb-1 block text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">Contact note</label>
+                          <textarea rows={4} value={siteContent.contact_note || ''} onChange={(e) => handleContentChange('contact_note', e.target.value)} className="w-full rounded-xl border border-zinc-300 bg-white px-3 py-3 text-sm text-zinc-900 focus:border-[#C5A059] focus:outline-none focus:ring-2 focus:ring-[#C5A059]/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white" />
+                        </div>
+                        <div className="md:col-span-2">
+                          <label className="mb-1 block text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">Footer note</label>
+                          <textarea rows={3} value={siteContent.footer_note || ''} onChange={(e) => handleContentChange('footer_note', e.target.value)} className="w-full rounded-xl border border-zinc-300 bg-white px-3 py-3 text-sm text-zinc-900 focus:border-[#C5A059] focus:outline-none focus:ring-2 focus:ring-[#C5A059]/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white" />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {settingsSection === 'pages' && (
+                    <div className="space-y-6">
+                      <div>
+                        <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#C5A059]">Navigation</p>
+                        <h3 className="mt-2 text-2xl font-black text-zinc-900 dark:text-white">Menu labels</h3>
+                      </div>
+                      <div className="grid gap-4 md:grid-cols-2">
+                        <div>
+                          <label className="mb-1 block text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">Home</label>
+                          <input value={siteContent.navigation_home || ''} onChange={(e) => handleContentChange('navigation_home', e.target.value)} className="w-full rounded-xl border border-zinc-300 bg-white px-3 py-3 text-sm text-zinc-900 focus:border-[#C5A059] focus:outline-none focus:ring-2 focus:ring-[#C5A059]/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white" />
+                        </div>
+                        <div>
+                          <label className="mb-1 block text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">Shop</label>
+                          <input value={siteContent.navigation_shop || ''} onChange={(e) => handleContentChange('navigation_shop', e.target.value)} className="w-full rounded-xl border border-zinc-300 bg-white px-3 py-3 text-sm text-zinc-900 focus:border-[#C5A059] focus:outline-none focus:ring-2 focus:ring-[#C5A059]/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white" />
+                        </div>
+                        <div>
+                          <label className="mb-1 block text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">Cart</label>
+                          <input value={siteContent.navigation_cart || ''} onChange={(e) => handleContentChange('navigation_cart', e.target.value)} className="w-full rounded-xl border border-zinc-300 bg-white px-3 py-3 text-sm text-zinc-900 focus:border-[#C5A059] focus:outline-none focus:ring-2 focus:ring-[#C5A059]/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white" />
+                        </div>
+                        <div>
+                          <label className="mb-1 block text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">Contact</label>
+                          <input value={siteContent.navigation_contact || ''} onChange={(e) => handleContentChange('navigation_contact', e.target.value)} className="w-full rounded-xl border border-zinc-300 bg-white px-3 py-3 text-sm text-zinc-900 focus:border-[#C5A059] focus:outline-none focus:ring-2 focus:ring-[#C5A059]/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white" />
+                        </div>
+                        <div>
+                          <label className="mb-1 block text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">Categories</label>
+                          <input value={siteContent.navigation_categories || ''} onChange={(e) => handleContentChange('navigation_categories', e.target.value)} className="w-full rounded-xl border border-zinc-300 bg-white px-3 py-3 text-sm text-zinc-900 focus:border-[#C5A059] focus:outline-none focus:ring-2 focus:ring-[#C5A059]/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white" />
+                        </div>
+                        <div>
+                          <label className="mb-1 block text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">Orders</label>
+                          <input value={siteContent.navigation_orders || ''} onChange={(e) => handleContentChange('navigation_orders', e.target.value)} className="w-full rounded-xl border border-zinc-300 bg-white px-3 py-3 text-sm text-zinc-900 focus:border-[#C5A059] focus:outline-none focus:ring-2 focus:ring-[#C5A059]/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white" />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {settingsSection === 'access' && (
+                    <div className="space-y-6">
+                      <div>
+                        <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#C5A059]">Access</p>
+                        <h3 className="mt-2 text-2xl font-black text-zinc-900 dark:text-white">Admin messaging</h3>
+                      </div>
+                      <div className="grid gap-4 md:grid-cols-2">
+                        <div className="md:col-span-2">
+                          <label className="mb-1 block text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">Access title</label>
+                          <input value={siteContent.admin_access_title || ''} onChange={(e) => handleContentChange('admin_access_title', e.target.value)} className="w-full rounded-xl border border-zinc-300 bg-white px-3 py-3 text-sm text-zinc-900 focus:border-[#C5A059] focus:outline-none focus:ring-2 focus:ring-[#C5A059]/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white" />
+                        </div>
+                        <div className="md:col-span-2">
+                          <label className="mb-1 block text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">Access message</label>
+                          <textarea rows={3} value={siteContent.admin_access_message || ''} onChange={(e) => handleContentChange('admin_access_message', e.target.value)} className="w-full rounded-xl border border-zinc-300 bg-white px-3 py-3 text-sm text-zinc-900 focus:border-[#C5A059] focus:outline-none focus:ring-2 focus:ring-[#C5A059]/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white" />
+                        </div>
+                        <div className="md:col-span-2">
+                          <label className="mb-1 block text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">Access note</label>
+                          <textarea rows={3} value={siteContent.admin_access_note || ''} onChange={(e) => handleContentChange('admin_access_note', e.target.value)} className="w-full rounded-xl border border-zinc-300 bg-white px-3 py-3 text-sm text-zinc-900 focus:border-[#C5A059] focus:outline-none focus:ring-2 focus:ring-[#C5A059]/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white" />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -1148,7 +1408,7 @@ export const Admin = () => {
                       <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400 line-clamp-1">{product.description || product.brand || ''}</p>
                       <div className="mt-2 flex items-center justify-between">
                         <span className="text-lg font-black text-[#C5A059]">
-                          ₵{Number(product.price).toLocaleString()}
+                          {formatCurrency(product.price)}
                         </span>
                         <span className="text-xs text-zinc-500 dark:text-zinc-400">
                           Stock: {product.quantity}
@@ -1321,7 +1581,7 @@ export const Admin = () => {
                             {/* Total */}
                             <td className="px-5 py-4">
                               <span className="text-lg font-black text-[#C5A059]">
-                                ₵{order.total?.toLocaleString()}
+                                {formatCurrency(order.total)}
                               </span>
                             </td>
 

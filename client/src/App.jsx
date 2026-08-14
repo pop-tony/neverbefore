@@ -15,6 +15,7 @@ import ProductDetails from './pages/ProductDetails'
 import Lookbook from './components/Lookbook'
 import InquiryPage from './pages/InquiryPage'
 import { Orders } from './pages/Orders'
+import ProfilePage from './pages/Profile'
 import AboutUs from './pages/AboutUs'
 import Terms from './pages/Terms'
 import PrivacyPolicy from './pages/PrivacyPolicy'
@@ -32,6 +33,7 @@ function AppContent() {
           <Route path='/product/:id' element={<ProductDetails />} />
           <Route path='/cart' element={<Cart />} />
           <Route path='/auth' element={<AuthPage />} />
+          <Route path='/profile' element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
           <Route path='/orders' element={<Orders />} />
           <Route path='/admin' element={<ProtectedRoute adminOnly={true}><Admin /></ProtectedRoute>} />
           <Route path='/order/:id' element={<OrderDetails />} />

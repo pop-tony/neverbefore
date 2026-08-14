@@ -24,6 +24,9 @@ const userAuth = async (req, res, next)=>{
             req.user = {
                 id: tokenDecode.id,
                 email: tokenDecode.email || null,
+                name: tokenDecode.full_name || tokenDecode.name || '',
+                username: tokenDecode.username || '',
+                number: tokenDecode.number || null,
                 full_name: tokenDecode.full_name || tokenDecode.name || '',
                 role: tokenDecode.role || (tokenDecode.isAdmin ? 'admin' : 'customer'),
                 isAdmin: Boolean(tokenDecode.isAdmin || tokenDecode.role === 'admin'),

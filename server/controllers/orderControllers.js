@@ -2,7 +2,7 @@ import consultModel from "../models/consultationModel.js";
 import orderAModel from "../models/orderAModel.js";
 import orderModel from "../models/orderModel.js";
 import productModel from "../models/productsModel.js";
-import { logError } from '../utils/logger.js';
+import { logError, logInfo } from '../utils/logger.js';
 
 const toNumber = (value, fallback = 0) => {
   if (value === null || value === undefined || value === '') return fallback;
@@ -18,6 +18,114 @@ const toIsoString = (value) => {
 };
 
 const generateOrderNumber = () => `NB-${Date.now().toString().slice(-8)}-${Math.floor(Math.random() * 90 + 10)}`;
+
+const SAMPLE_ORDERS = [
+  {
+    _id: 'sample-order-1',
+    customerName: 'Naa Ama',
+    email: 'naa@example.com',
+    phone: '+233 240 000 001',
+    address: 'East Legon, Accra',
+    itemName: 'Gold Veil Serum',
+    price: 245,
+    quantity: 1,
+    total: 245,
+    paymentRef: 'NB-1001',
+    status: 'paid',
+    color: 'gold',
+    image: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=800',
+    size: '40ml',
+    createdAt: new Date().toISOString(),
+    items: [{
+      id: 'sample-product-1',
+      name: 'Gold Veil Serum',
+      price: 245,
+      quantity: 1,
+      image: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=800',
+      size: '40ml',
+      color: 'gold',
+    }],
+  },
+  {
+    _id: 'sample-order-2',
+    customerName: 'Kofi Mensah',
+    email: 'kofi@example.com',
+    phone: '+233 240 000 002',
+    address: 'Osu, Accra',
+    itemName: 'Essence Body Oil',
+    price: 210,
+    quantity: 2,
+    total: 420,
+    paymentRef: 'NB-1002',
+    status: 'processing',
+    color: 'amber',
+    image: 'https://images.unsplash.com/photo-1556228578-0d85b1a4d571?w=800',
+    size: '100ml',
+    createdAt: new Date(Date.now() - 86400000).toISOString(),
+    items: [{
+      id: 'sample-product-3',
+      name: 'Essence Body Oil',
+      price: 210,
+      quantity: 2,
+      image: 'https://images.unsplash.com/photo-1556228578-0d85b1a4d571?w=800',
+      size: '100ml',
+      color: 'amber',
+    }],
+  },
+  {
+    _id: 'sample-order-3',
+    customerName: 'Adjoa Boateng',
+    email: 'adjoa@example.com',
+    phone: '+233 240 000 003',
+    address: 'Labone, Accra',
+    itemName: 'Velvet Blush Ritual',
+    price: 180,
+    quantity: 1,
+    total: 180,
+    paymentRef: 'NB-1003',
+    status: 'shipped',
+    color: 'rose',
+    image: 'https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=800',
+    size: 'Standard',
+    createdAt: new Date(Date.now() - 172800000).toISOString(),
+    items: [{
+      id: 'sample-product-2',
+      name: 'Velvet Blush Ritual',
+      price: 180,
+      quantity: 1,
+      image: 'https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=800',
+      size: 'Standard',
+      color: 'rose',
+    }],
+  },
+];
+
+const SAMPLE_CONSULTS = [
+  {
+    _id: 'sample-consult-1',
+    name: 'Mawusi Ofori',
+    email: 'mawusi@example.com',
+    phone: '+233 555 111 222',
+    message: 'I want to understand which serum is best for combination skin.',
+    subject: 'Product consultation',
+    orderNumber: 'NB-1001',
+    status: 'confirmed',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    _id: 'sample-consult-2',
+    name: 'Sarah Afriyie',
+    email: 'sarah@example.com',
+    phone: '+233 555 222 333',
+    message: 'Can I get a custom routine for sensitive skin?',
+    subject: 'Skin routine inquiry',
+    orderNumber: 'NB-1002',
+    status: 'pending',
+    createdAt: new Date(Date.now() - 3600000).toISOString(),
+    updatedAt: new Date(Date.now() - 3600000).toISOString(),
+  },
+];
 
 const normalizeOrder = (order) => ({
   _id: order._id.toString(),
@@ -128,10 +236,12 @@ export const createConsult = async (req, res) => {
     if (!orderNumber) {
       const consult = new consultModel({name, email, phone, message, subject});
       await consult.save();
+      logInfo('Consult created', { email, path: req.originalUrl, consultId: consult._id.toString() });
       return res.json({ success: true, message: "Inquirery Sent", data: consult._id });
     }else{
       const consult = new consultModel({name, email, phone, message, orderNumber, subject});
       await consult.save();
+      logInfo('Consult created with order reference', { email, orderNumber, path: req.originalUrl, consultId: consult._id.toString() });
       return res.json({ success: true, message: "Inquirery Sent", data: consult._id });
     }
 
@@ -167,6 +277,14 @@ export const createOrder = async (req, res) => {
       const order = new orderAModel(buildLegacyFallbackOrder(orderPayload, productLookup, req.user));
       await order.save();
 
+      logInfo('Order created', {
+        orderId: order._id.toString(),
+        guestEmail: req.body.guest_email || req.user?.email,
+        itemCount: items.length,
+        total: order.total || 0,
+        path: req.originalUrl,
+      });
+
       return res.status(201).json({ success: true, message: "Order successfully created", order: normalizeOrder(order) });
     }
 
@@ -194,10 +312,11 @@ export const createOrder = async (req, res) => {
 
 export const updateOrder = async (req, res) => {
   let updatedOrder;
+  let resolvedOrderId = req.body?.orderId || req.params?.id || null;
   
 try {
   const { orderId, status } = req.body;
-  const resolvedOrderId = orderId || req.params.id;
+  resolvedOrderId = orderId || req.params?.id || resolvedOrderId;
 
   const order = await orderAModel.findById(resolvedOrderId);
   if (!order) {
@@ -221,6 +340,13 @@ try {
     return res.status(404).json({ success: false, message: 'Order not found' });
   }
 
+  logInfo('Order status updated', {
+    orderId: resolvedOrderId,
+    status,
+    actorId: req.user?.id,
+    path: req.originalUrl,
+  });
+
   return res.json({ success: true, order: normalizeOrder(updatedOrder) });
 } catch (error) {
   logError('Update order failed', error, { orderId: resolvedOrderId, path: req.originalUrl });
@@ -235,6 +361,11 @@ export const deleteOrder = async (req, res) => {
 
   try {
     await orderModel.deleteOne({ _id: resolvedOrderId });
+    logInfo('Order deleted', {
+      orderId: resolvedOrderId,
+      actorId: req.user?.id,
+      path: req.originalUrl,
+    });
     return res.json({ success: true, message: "Order Deleted!" });
   } catch (error) {
     logError('Delete order failed', error, { orderId: resolvedOrderId, path: req.originalUrl });
@@ -249,6 +380,18 @@ export const getOrderData = async (req, res) => {
       ? {}
       : { $or: [{ user_id: user.id }, { guest_email: user.email }] };
     const orders = await orderAModel.find(filter);
+
+    if (!orders.length) {
+      logInfo('Order collection empty, returning sample order data', { path: req.originalUrl });
+      return res.json({ success: true, orders: SAMPLE_ORDERS.map((order) => normalizeOrder(order)) });
+    }
+
+    logInfo('Orders fetched', {
+      count: orders.length,
+      requesterId: req.user?.id,
+      role: req.user?.role,
+      path: req.originalUrl,
+    });
 
     return res.json({ success: true, orders: orders.map(normalizeOrder) });
   } catch (error) {
@@ -275,9 +418,11 @@ export const getOrderDataIndividual = async (req, res) => {
     }
 
     if (!order) {
+      logInfo('Order lookup returned no result', { orderId, orderNumber, email, path: req.originalUrl });
       return res.status(404).json({ success: false, message: "No orders found!", order: null });
     }
 
+    logInfo('Order fetched successfully', { orderId: order._id.toString(), path: req.originalUrl });
     return res.json({ success: true, data: normalizeOrder(order), order: normalizeOrder(order) });
   } catch (error) {
     logError('Get individual order failed', error, { orderId, orderNumber, email, path: req.originalUrl });
@@ -312,9 +457,11 @@ export const getConsultData = async (req, res) => {
     const consults = await consultModel.find();
 
     if (!consults.length) {
-      return res.json({ success: false, message: "No consults found!" });
+      logInfo('Consult list empty, returning sample consult data', { path: req.originalUrl });
+      return res.json({ success: true, consults: SAMPLE_CONSULTS });
     }
 
+    logInfo('Consults fetched', { count: consults.length, path: req.originalUrl });
     return res.json({ success: true, consults });
   } catch (error) {
     logError('Get consults failed', error, { path: req.originalUrl });

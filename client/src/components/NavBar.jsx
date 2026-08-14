@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
+import { useSiteContent } from '../hooks/useSiteContent';
 import { ShoppingCart, Menu, X, User, LogOut, ShieldCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ThemeToggle from './ThemeToggle';
@@ -12,15 +13,16 @@ export default function NavBar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { cartCount } = useCart();
   const { user, isAuthenticated, isAdmin, logout } = useAuth();
+  const { content } = useSiteContent();
   const navigate = useNavigate();
   const location = useLocation();
 
   const navLinks = [
-    { href: "/", label: "Home" },
-    { href: "/shop", label: "Atelier" },
-    { href: "/orders", label: "Orders" },
+    { href: "/", label: content?.navigation_home || "Home" },
+    { href: "/shop", label: content?.navigation_shop || "Shop" },
+    { href: "/orders", label: content?.navigation_orders || "Orders" },
     { href: "/about", label: "Rituals" },
-    { href: "/contact", label: "Contact" },
+    { href: "/contact", label: content?.navigation_contact || "Contact" },
   ];
 
   useEffect(() => {
@@ -48,88 +50,95 @@ export default function NavBar() {
   return (
     <>
       <nav
-        className={`sticky top-0 z-50 w-full transition-all duration-300 ${
+        className={`sticky top-0 z-50 w-full border-b border-zinc-200/70 transition-all duration-300 ${
           scrolled
-           ? 'bg-white/90 backdrop-blur-xl shadow-[0_1px_0_0_#F5EFE6] dark:bg-neutral-950/90'
-            : 'bg-white/60 backdrop-blur-md dark:bg-transparent'
+            ? 'bg-white/85 shadow-[0_1px_0_rgba(24,24,27,0.06)] backdrop-blur-xl dark:border-zinc-800 dark:bg-neutral-950/85'
+            : 'bg-white/70 backdrop-blur-md dark:border-zinc-800/80 dark:bg-neutral-950/40'
         }`}
       >
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 text-zinc-900 dark:text-white">
-          {/* Logo - Gold + White Luxury */}
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3.5 text-zinc-900 dark:text-white sm:px-6 lg:px-8">
           <button
             onClick={() => navigate('/')}
-            className="cursor-pointer tracking-[0.2em] transition hover:opacity-80 text-left"
+            className="group text-left transition hover:opacity-90"
+            aria-label="Go to home"
           >
-            <span className="block text- font-semibold text-zinc-500 dark:text-zinc-400 leading-none">NEVER BEFORE</span>
-            <span className="block -mt-1 font-serif text-2xl font-light text-[#C5A059]">Cosmetic</span>
+            <span className="block text-[10px] font-semibold uppercase tracking-[0.35em] text-zinc-500 dark:text-zinc-400">
+              Never Before
+            </span>
+            <span className="mt-1 block font-serif text-2xl font-medium tracking-wide text-[#C5A059]">
+              Cosmetic
+            </span>
           </button>
 
-          {/* Desktop Nav */}
-          <div className="hidden items-center gap-8 md:flex">
-            {navLinks.map(link => (
-              <button
-                key={link.href}
-                onClick={() => handleLinkClick(link.href)}
-                className={`cursor-pointer text- font-semibold uppercase tracking-[0.2em] transition hover:text-[#C5A059] ${
-                  location.pathname === link.href? 'text-[#C5A059]' : 'text-zinc-600 dark:text-zinc-300'
-                }`}
-              >
-                {link.label}
-              </button>
-            ))}
-
-            <div className="flex items-center gap-2">
-              {isAdmin && (
+          <div className="hidden items-center justify-center md:flex">
+            <div className="flex items-center gap-1 rounded-full border border-zinc-200 bg-white/80 px-2 py-1.5 shadow-sm shadow-zinc-200/60 dark:border-zinc-800 dark:bg-zinc-900/80 dark:shadow-none">
+              {navLinks.map(link => (
                 <button
-                  onClick={() => navigate('/admin')}
-                  className={`cursor-pointer flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-bold uppercase tracking-[0.15em] transition ${
-                    location.pathname === '/admin'
-                      ? 'bg-[#C5A059] text-white'
-                      : 'border border-[#C5A059]/50 text-[#C5A059] hover:bg-[#C5A059]/10'
+                  key={link.href}
+                  onClick={() => handleLinkClick(link.href)}
+                  className={`rounded-full px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.22em] transition ${
+                    location.pathname === link.href
+                      ? 'bg-[#C5A059] text-white shadow-sm'
+                      : 'text-zinc-600 hover:bg-zinc-100 hover:text-[#C5A059] dark:text-zinc-300 dark:hover:bg-zinc-800'
                   }`}
                 >
-                  <ShieldCheck className="h-3.5 w-3.5" />
-                  Admin
+                  {link.label}
                 </button>
-              )}
+              ))}
+            </div>
+          </div>
 
-              {isAuthenticated ? (
-                <>
-                  <button
-                    onClick={() => handleLinkClick('/orders')}
-                    className="cursor-pointer flex items-center gap-1.5 rounded-full border border-zinc-200 px-4 py-2 text-xs font-bold uppercase tracking-[0.15em] text-zinc-600 transition hover:border-[#C5A059] hover:text-[#C5A059] dark:border-zinc-700 dark:text-zinc-300"
-                  >
-                    <User className="h-3.5 w-3.5" />
-                    {user?.name?.split(' ')[0] || user?.username || 'Account'}
-                  </button>
-                  <button
-                    onClick={handleLogout}
-                    className="cursor-pointer flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-bold uppercase tracking-[0.15em] text-zinc-500 transition hover:text-red-500"
-                  >
-                    <LogOut className="h-3.5 w-3.5" />
-                    Logout
-                  </button>
-                </>
-              ) : (
+          <div className="hidden items-center gap-3 md:flex">
+            {isAdmin && (
+              <button
+                onClick={() => navigate('/admin')}
+                className={`flex items-center gap-1.5 rounded-full px-3.5 py-2 text-[10px] font-bold uppercase tracking-[0.18em] transition ${
+                  location.pathname === '/admin'
+                    ? 'bg-[#C5A059] text-white'
+                    : 'border border-[#C5A059]/40 bg-[#C5A059]/5 text-[#C5A059] hover:bg-[#C5A059]/10'
+                }`}
+              >
+                <ShieldCheck className="h-3.5 w-3.5" />
+                Admin
+              </button>
+            )}
+
+            {isAuthenticated ? (
+              <>
                 <button
-                  onClick={() => navigate('/auth')}
-                  className="cursor-pointer flex items-center gap-1.5 rounded-full bg-[#C5A059] px-5 py-2 text-xs font-bold uppercase tracking-[0.15em] text-white transition hover:bg-[#B08D4F]"
+                  onClick={() => handleLinkClick('/profile')}
+                  className="flex items-center gap-1.5 rounded-full border border-zinc-200 bg-white px-3.5 py-2 text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-700 transition hover:border-[#C5A059] hover:text-[#C5A059] dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200"
                 >
                   <User className="h-3.5 w-3.5" />
-                  Sign In
+                  Profile
                 </button>
-              )}
-            </div>
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center gap-1.5 rounded-full px-3.5 py-2 text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-500 transition hover:text-red-500"
+                >
+                  <LogOut className="h-3.5 w-3.5" />
+                  Logout
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={() => navigate('/auth')}
+                className="flex items-center gap-1.5 rounded-full bg-[#C5A059] px-4 py-2.5 text-[10px] font-bold uppercase tracking-[0.18em] text-white transition hover:bg-[#B08D4F]"
+              >
+                <User className="h-3.5 w-3.5" />
+                Sign In
+              </button>
+            )}
 
             <button
               onClick={() => navigate('/cart')}
-              className="cursor-pointer relative rounded-full bg-[#C5A059] px-7 py-3 text- font-bold uppercase tracking-[0.15em] text-white transition hover:bg-[#B08D4F]"
+              className="relative flex items-center justify-center rounded-full bg-[#C5A059] px-4 py-2.5 text-[10px] font-bold uppercase tracking-[0.18em] text-white transition hover:bg-[#B08D4F]"
             >
-              <ShoppingCart className="mr-2 inline h-3.5 w-3.5" />
-              Bag
+              <ShoppingCart className="h-3.5 w-3.5" />
+              <span className="ml-2">Bag</span>
               {cartCount > 0 && (
-                <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-black text- font-bold text-white">
-                  {cartCount > 9? '9+' : cartCount}
+                <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-zinc-900 text-[9px] font-bold text-white">
+                  {cartCount > 9 ? '9+' : cartCount}
                 </span>
               )}
             </button>
@@ -137,13 +146,12 @@ export default function NavBar() {
             <ThemeToggle />
           </div>
 
-          {/* Mobile buttons */}
-          <div className="flex items-center gap-4 md:hidden">
-            <button onClick={() => navigate('/cart')} className="relative">
-              <ShoppingCart className="h-5 w-5" />
+          <div className="flex items-center gap-3 md:hidden">
+            <button onClick={() => navigate('/cart')} className="relative flex h-10 w-10 items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-700 transition hover:border-[#C5A059] hover:text-[#C5A059] dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200">
+              <ShoppingCart className="h-4 w-4" />
               {cartCount > 0 && (
-                <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-[#C5A059] text-xs font-bold text-white">
-                  {cartCount > 9? '9+' : cartCount}
+                <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#C5A059] text-[9px] font-bold text-white">
+                  {cartCount > 9 ? '9+' : cartCount}
                 </span>
               )}
             </button>
@@ -152,65 +160,66 @@ export default function NavBar() {
 
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
-              className="text-2xl leading-none"
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-700 transition hover:border-[#C5A059] hover:text-[#C5A059] dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200"
               aria-label="Toggle menu"
             >
-              {mobileOpen? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              {mobileOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
             </button>
           </div>
         </div>
       </nav>
 
-      {/* Mobile menu overlay - Gold luxury */}
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-40 bg-white pt-20 dark:bg-neutral-950 md:hidden"
+            className="fixed inset-0 z-40 bg-white/95 pt-20 dark:bg-neutral-950/95 md:hidden"
           >
             <motion.div
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              className="flex flex-col items-center gap-8 p-8 text-zinc-900 dark:text-white"
+              className="mx-auto flex max-w-md flex-col gap-5 px-6 py-8"
             >
-              {navLinks.map(link => (
-                <button
-                  key={link.href}
-                  onClick={() => handleLinkClick(link.href)}
-                  className="font-serif text-2xl font-light tracking-wide transition hover:text-[#C5A059]"
-                >
-                  {link.label}
-                </button>
-              ))}
+              <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+                {navLinks.map(link => (
+                  <button
+                    key={link.href}
+                    onClick={() => handleLinkClick(link.href)}
+                    className={`flex w-full items-center justify-between rounded-xl px-4 py-3 text-left text-sm font-semibold uppercase tracking-[0.2em] transition ${
+                      location.pathname === link.href ? 'bg-[#C5A059]/10 text-[#C5A059]' : 'text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800'
+                    }`}
+                  >
+                    <span>{link.label}</span>
+                  </button>
+                ))}
+              </div>
 
               {isAdmin && (
                 <button
                   onClick={() => handleLinkClick('/admin')}
-                  className="flex items-center gap-2 font-serif text-2xl font-light tracking-wide text-[#C5A059] transition hover:opacity-80"
+                  className="flex items-center justify-center gap-2 rounded-full border border-[#C5A059]/40 bg-[#C5A059]/5 px-5 py-3 text-xs font-bold uppercase tracking-[0.2em] text-[#C5A059]"
                 >
-                  <ShieldCheck className="h-5 w-5" />
+                  <ShieldCheck className="h-4 w-4" />
                   Admin
                 </button>
               )}
 
-              <div className="h- w-12 bg-[#E8D5B5] my-2"></div>
-
               {isAuthenticated ? (
                 <>
-                  <p className="text-sm font-semibold text-zinc-600 dark:text-zinc-400">
+                  <p className="text-center text-sm text-zinc-600 dark:text-zinc-400">
                     Signed in as {user?.name || user?.username || user?.email}
                   </p>
                   <button
-                    onClick={() => handleLinkClick('/orders')}
-                    className="rounded-full border border-zinc-200 px-10 py-4 text-xs font-bold uppercase tracking-[0.2em] text-zinc-600 transition hover:border-[#C5A059] hover:text-[#C5A059] dark:border-zinc-700 dark:text-zinc-300"
+                    onClick={() => handleLinkClick('/profile')}
+                    className="rounded-full border border-zinc-200 px-5 py-3 text-xs font-bold uppercase tracking-[0.2em] text-zinc-700 transition hover:border-[#C5A059] hover:text-[#C5A059] dark:border-zinc-700 dark:text-zinc-200"
                   >
-                    My Orders
+                    Profile
                   </button>
                   <button
                     onClick={handleLogout}
-                    className="flex items-center gap-2 rounded-full border border-zinc-200 px-10 py-4 text-xs font-bold uppercase tracking-[0.2em] text-zinc-500 transition hover:border-red-400 hover:text-red-500 dark:border-zinc-700"
+                    className="flex items-center justify-center gap-2 rounded-full border border-zinc-200 px-5 py-3 text-xs font-bold uppercase tracking-[0.2em] text-zinc-500 transition hover:border-red-400 hover:text-red-500 dark:border-zinc-700"
                   >
                     <LogOut className="h-4 w-4" />
                     Logout
@@ -218,8 +227,8 @@ export default function NavBar() {
                 </>
               ) : (
                 <button
-                  onClick={() => { handleLinkClick('/auth'); }}
-                  className="flex items-center gap-2 rounded-full bg-[#C5A059] px-10 py-4 text-xs font-bold uppercase tracking-[0.2em] text-white transition hover:bg-[#B08D4F]"
+                  onClick={() => handleLinkClick('/auth')}
+                  className="flex items-center justify-center gap-2 rounded-full bg-[#C5A059] px-5 py-3 text-xs font-bold uppercase tracking-[0.2em] text-white transition hover:bg-[#B08D4F]"
                 >
                   <User className="h-4 w-4" />
                   Sign In / Sign Up
@@ -227,8 +236,8 @@ export default function NavBar() {
               )}
 
               <button
-                onClick={() => { handleLinkClick('/cart'); }}
-                className="rounded-full bg-[#C5A059] px-10 py-4 text-xs font-bold uppercase tracking-[0.2em] text-white transition hover:bg-[#B08D4F]"
+                onClick={() => handleLinkClick('/cart')}
+                className="rounded-full bg-[#C5A059] px-5 py-3 text-xs font-bold uppercase tracking-[0.2em] text-white transition hover:bg-[#B08D4F]"
               >
                 View Bag {cartCount > 0 && `(${cartCount})`}
               </button>

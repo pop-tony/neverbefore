@@ -5,9 +5,28 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-*{
+:root {
+  color-scheme: light;
+}
+
+* {
   font-family: "Manrope", sans-serif;
   font-weight: 500;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: #f7f4ee;
+  color: #18181b;
+}
+
+body.dark {
+  background: #09090b;
+  color: #f4f4f5;
 }
 
 @theme {
@@ -22,24 +41,66 @@
   scrollbar-width: none;
 }
 
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-12px); }
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 0 rgba(197, 160, 89, 0); }
+  50% { box-shadow: 0 0 26px rgba(197, 160, 89, 0.25); }
+}
+
+.animate-float {
+  animation: float 7s ease-in-out infinite;
+}
+
+.animate-fade-up {
+  animation: fadeUp 0.75s ease-out both;
+}
+
+.hero-glow {
+  animation: pulseGlow 5s ease-in-out infinite;
+}
+
+.soft-card {
+  box-shadow: 0 18px 60px rgba(24, 24, 27, 0.08);
+}
+
+.store-card {
+  transition: transform 0.35s ease, box-shadow 0.35s ease;
+}
+
+.store-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 45px rgba(24, 24, 27, 0.12);
+}
+
 @media print {
-  /* Hide interactive stuff */
   button,.no-print {
     display: none!important;
   }
 
-  /* Force colors to print */
-    * {
+  * {
     -webkit-print-color-adjust: exact!important;
     print-color-adjust: exact!important;
   }
 
-  /* Make gradients solid for PDF */
- .bg-gradient-to-r,.bg-gradient-to-br {
-    background: #f43f5e!important; /* rose-500 */
+  .bg-gradient-to-r,.bg-gradient-to-br {
+    background: #f43f5e!important;
   }
 
-  /* Clean backgrounds */
   body {
     background: white!important;
   }

@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 
 const userShema = new mongoose.Schema({
     name: {type: String, required: true},
+    username: {type: String, default: ''},
     email: {type: String, required: true, unique: true},
     password: {type: String, required: true},
     number: {type: Number, required: true},
@@ -11,7 +12,7 @@ const userShema = new mongoose.Schema({
     resetOtp: {type: String, default: ''},
     resetOtpExpireAt: {type: Number, default: 0},
     isAdmin: {type: Boolean, default: false},
-})
+}, { timestamps: true })
 
 const userModel = mongoose.models.user1 || mongoose.model('user1', userShema);
 
