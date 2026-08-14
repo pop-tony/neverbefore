@@ -1,11 +1,18 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import logo from '../assets/logo.jpeg';
+
+const SITE_CONTENT_CACHE_KEY = 'neverbefore_site_content';
+let cachedContent = null;
+let fetchPromise = null;
+let hasFetchedOnce = false;
+const listeners = new Set();
 
 export const defaultSiteContent = {
   key: 'primary',
   brand_name: 'Never Before Cosmetics',
   brand_tagline: 'Beauty with a premium touch',
-  logo_url: '/WhatsApp_Image_2026-07-06_at_12.02.55_PM.jpeg',
+  logo_url: logo,
   hero_badge: 'Limited Time Offer',
   hero_title: 'Get a whopping discount of up to 50%',
   hero_subtitle: 'Shop our premium collection of cosmetics and beauty products.',
@@ -38,39 +45,83 @@ export const defaultSiteContent = {
   categories: [],
 };
 
+export function getCachedSiteContent() {
+  if (cachedContent) return cachedContent;
+
+  if (typeof window !== 'undefined') {
+    try {
+      const stored = window.localStorage.getItem(SITE_CONTENT_CACHE_KEY);
+      if (stored) {
+        cachedContent = { ...defaultSiteContent, ...JSON.parse(stored) };
+        return cachedContent;
+      }
+    } catch (error) {
+      console.warn('Unable to read cached site content', error);
+    }
+  }
+
+  cachedContent = defaultSiteContent;
+  return cachedContent;
+}
+
+export function setSiteContentCache(nextContent) {
+  const merged = { ...defaultSiteContent, ...(nextContent || {}) };
+  cachedContent = merged;
+
+  if (typeof window !== 'undefined') {
+    window.localStorage.setItem(SITE_CONTENT_CACHE_KEY, JSON.stringify(merged));
+  }
+
+  listeners.forEach(listener => listener(merged));
+  return merged;
+}
+
+export async function refreshSiteContent() {
+  if (fetchPromise) return fetchPromise;
+
+  const configuredBase = (import.meta.env.VITE_BACKEND_URL || '/api').replace(/\/+$/, '');
+  const backendUrl = configuredBase.endsWith('/api') ? configuredBase : `${configuredBase}/api`;
+
+  fetchPromise = axios.get(`${backendUrl}/content/site-content`, { withCredentials: true })
+    .then((res) => {
+      const nextContent = res.data?.content ? { ...defaultSiteContent, ...res.data.content } : getCachedSiteContent();
+      setSiteContentCache(nextContent);
+      hasFetchedOnce = true;
+      return nextContent;
+    })
+    .catch((error) => {
+      console.warn('Site content unavailable, using cached data.', error);
+      const fallback = getCachedSiteContent();
+      setSiteContentCache(fallback);
+      return fallback;
+    })
+    .finally(() => {
+      fetchPromise = null;
+    });
+
+  return fetchPromise;
+}
+
 export function useSiteContent() {
-  const [content, setContent] = useState(defaultSiteContent);
-  const [loading, setLoading] = useState(true);
+  const [content, setContent] = useState(() => getCachedSiteContent());
+  const [loading, setLoading] = useState(!hasFetchedOnce);
 
   useEffect(() => {
-    let isMounted = true;
+    const handleContentUpdate = (nextContent) => setContent(nextContent);
+    listeners.add(handleContentUpdate);
+    setContent(getCachedSiteContent());
 
-    const fetchSiteContent = async () => {
-      try {
-        const configuredBase = (import.meta.env.VITE_BACKEND_URL || '/api').replace(/\/+$/, '');
-        const backendUrl = configuredBase.endsWith('/api') ? configuredBase : `${configuredBase}/api`;
-
-        const res = await axios.get(`${backendUrl}/content/site-content`, { withCredentials: true });
-
-        if (isMounted && res.data?.content) {
-          setContent({ ...defaultSiteContent, ...res.data.content });
-        }
-      } catch (error) {
-        console.warn('Site content unavailable, using fallback memory data.', error);
-        if (isMounted) {
-          setContent(defaultSiteContent);
-        }
-      } finally {
-        if (isMounted) setLoading(false);
-      }
-    };
-
-    fetchSiteContent();
+    if (!hasFetchedOnce) {
+      setLoading(true);
+      refreshSiteContent().finally(() => setLoading(false));
+    } else {
+      setLoading(false);
+    }
 
     return () => {
-      isMounted = false;
+      listeners.delete(handleContentUpdate);
     };
   }, []);
 
-  return { content, loading };
+  return { content, loading, refresh: refreshSiteContent };
 }

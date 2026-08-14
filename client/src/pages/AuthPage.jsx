@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Lock, User, Phone, ArrowRight, Eye, EyeOff, LogIn, UserPlus } from 'lucide-react';
+import logo from '../assets/logo.jpeg';
 
 export default function AuthPage() {
   const [mode, setMode] = useState('login'); // 'login' | 'register'
@@ -94,6 +95,11 @@ export default function AuthPage() {
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="mb-8 text-center">
+          <img
+            src={logo}
+            alt="Never Before Cosmetics logo"
+            className="mx-auto mb-5 h-28 w-28 rounded-full border-4 border-white bg-white object-cover p-2 shadow-[0_12px_30px_rgba(0,0,0,0.12)]"
+          />
           <p className="text-xs font-semibold uppercase tracking-[0.3em] text-zinc-500 dark:text-zinc-400">NEVER BEFORE</p>
           <h1 className="mt-2 font-serif text-4xl font-light text-zinc-900 dark:text-white">
             Cosmetic <span className="text-[#C5A059]">Atelier</span>

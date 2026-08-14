@@ -1,6 +1,7 @@
 import { FaTwitter, FaInstagram, FaFacebookF, FaTiktok } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 import { useSiteContent } from '../hooks/useSiteContent';
+import logo from '../assets/logo.jpeg';
 
 export default function Footer() {
   const { content } = useSiteContent();
@@ -15,9 +16,16 @@ export default function Footer() {
   return (
     <footer className="border-t border-zinc-200 bg-zinc-50 text-zinc-900 dark:border-zinc-800 dark:bg-black dark:text-white">
       <div className="mx-auto max-w-7xl px-4 py-12">
-        <div>
-          <h3 className="mb-4 text-2xl font-black">{(content?.brand_name || 'NEVER BEFORE').toUpperCase()} <span className="text-[#C5A059]">COSMETIC</span></h3>
-          <p className="text-sm text-zinc-600 dark:text-zinc-400">{content?.brand_tagline || 'Gold-standard rituals for skin that glows like never before.'}</p>
+        <div className="flex items-center gap-4">
+          <img
+            src={content?.logo_url || logo}
+            alt="Never Before Cosmetics logo"
+            className="h-16 w-16 rounded-full border border-[#C5A059]/20 bg-white object-cover p-2 shadow-sm"
+          />
+          <div>
+            <h3 className="mb-2 text-2xl font-black">{(content?.brand_name || 'NEVER BEFORE').toUpperCase()} <span className="text-[#C5A059]">COSMETIC</span></h3>
+            <p className="text-sm text-zinc-600 dark:text-zinc-400">{content?.brand_tagline || 'Gold-standard rituals for skin that glows like never before.'}</p>
+          </div>
         </div>
         <div className="grid grid-cols-3 gap-8 mt-3">
           <div>

@@ -5,6 +5,8 @@ import StyleCarousel from '../components/StyleCarousel';
 import { Sparkles, ShieldCheck, Truck, Star } from 'lucide-react';
 import { useSiteContent } from '../hooks/useSiteContent';
 
+import logo from '../assets/logo.jpeg';
+
 const Home = () => {
   const { content } = useSiteContent();
 
@@ -15,7 +17,11 @@ const Home = () => {
       <section id="about" className="bg-[#FBF8F4] px-4 py-20 text-zinc-900 dark:bg-[#09090B] dark:text-white">
         <div className="mx-auto max-w-5xl text-center">
           <div className="mx-auto mb-8 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-r from-[#C5A059] to-[#E8D5B5] text-white shadow-[0_20px_40px_rgba(197,160,89,0.3)]">
-            <Sparkles className="h-7 w-7" />
+            <img
+              src={content?.logo_url || logo}
+              alt="Never Before Cosmetics logo"
+              className="h-16 w-16 rounded-full border border-[#C5A059]/20 bg-white object-cover p-2 shadow-sm"
+            />
           </div>
 
           <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-[#C5A059]">Why choose us</p>

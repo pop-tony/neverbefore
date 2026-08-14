@@ -4,6 +4,7 @@ import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, R
 import { toast } from 'sonner';
 import { MapPin, Phone, Mail, Calendar, CreditCard, Package, Truck, CheckCircle, Clock, AlertCircle, RefreshCw, ShoppingBag, XCircle, RotateCcw, Search, ChevronDown, ChevronUp, X, Plus, Trash2, Edit } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { setSiteContentCache } from '../hooks/useSiteContent';
 
 const formatCurrency = (value) => `₵${Number(value ?? 0).toLocaleString()}`;
 
@@ -289,8 +290,10 @@ export const Admin = () => {
     try {
       const res = await axios.put(`${backendUrl}/content/site-content`, siteContent, { withCredentials: true });
       if (res.data.success) {
+        const updatedContent = { ...siteContent, ...(res.data.content || {}) };
+        setSiteContent(updatedContent);
+        setSiteContentCache(updatedContent);
         toast.success('Site content updated');
-        setSiteContent(res.data.content);
       } else {
         toast.error(res.data.message || 'Failed to update content');
       }
@@ -1062,6 +1065,45 @@ export const Admin = () => {
                         <div className="md:col-span-2">
                           <label className="mb-1 block text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">Brand name</label>
                           <input value={siteContent.brand_name || ''} onChange={(e) => handleContentChange('brand_name', e.target.value)} className="w-full rounded-xl border border-zinc-300 bg-white px-3 py-3 text-sm text-zinc-900 focus:border-[#C5A059] focus:outline-none focus:ring-2 focus:ring-[#C5A059]/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white" />
+                        </div>
+
+                        <div className="md:col-span-2">
+                          <label className="mb-1 block text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">Brand logo</label>
+                          <div className="space-y-3 rounded-2xl border border-dashed border-zinc-300 bg-zinc-50 p-4 dark:border-zinc-700 dark:bg-zinc-800/60">
+                            <div className="flex items-center gap-4">
+                              {(siteContent.logo_url || '').trim() ? (
+                                <img
+                                  src={siteContent.logo_url}
+                                  alt="Brand logo preview"
+                                  className="h-20 w-20 rounded-full border border-[#C5A059]/20 bg-white object-cover p-2 shadow-sm"
+                                />
+                              ) : (
+                                <div className="flex h-20 w-20 items-center justify-center rounded-full border border-dashed border-zinc-300 bg-white text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-500">
+                                  Logo
+                                </div>
+                              )}
+                              <div className="flex-1">
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (!file) return;
+
+                                    const reader = new FileReader();
+                                    reader.onloadend = () => {
+                                      handleContentChange('logo_url', reader.result);
+                                    };
+                                    reader.readAsDataURL(file);
+                                  }}
+                                  className="block w-full text-sm text-zinc-600 file:mr-4 file:rounded-full file:border-0 file:bg-[#C5A059] file:px-4 file:py-2 file:text-xs file:font-bold file:uppercase file:tracking-[0.2em] file:text-white hover:file:bg-[#B08D4F] dark:text-zinc-300"
+                                />
+                                <p className="mt-2 text-[11px] text-zinc-500 dark:text-zinc-400">
+                                  Upload a square logo image. It will be saved with the site settings.
+                                </p>
+                              </div>
+                            </div>
+                          </div>
                         </div>
                         <div className="md:col-span-2">
                           <label className="mb-1 block text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">Brand tagline</label>

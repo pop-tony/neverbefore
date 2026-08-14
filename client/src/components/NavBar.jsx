@@ -7,6 +7,7 @@ import { useSiteContent } from '../hooks/useSiteContent';
 import { ShoppingCart, Menu, X, User, LogOut, ShieldCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ThemeToggle from './ThemeToggle';
+import logo from '../assets/logo.jpeg';
 
 export default function NavBar() {
   const [scrolled, setScrolled] = useState(false);
@@ -59,15 +60,22 @@ export default function NavBar() {
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3.5 text-zinc-900 dark:text-white sm:px-6 lg:px-8">
           <button
             onClick={() => navigate('/')}
-            className="group text-left transition hover:opacity-90"
+            className="group flex items-center gap-3 text-left transition hover:opacity-90"
             aria-label="Go to home"
           >
-            <span className="block text-[10px] font-semibold uppercase tracking-[0.35em] text-zinc-500 dark:text-zinc-400">
-              Never Before
-            </span>
-            <span className="mt-1 block font-serif text-2xl font-medium tracking-wide text-[#C5A059]">
-              Cosmetic
-            </span>
+            <img
+              src={logo}
+              alt="Never Before Cosmetics logo"
+              className="h-12 w-12 rounded-full border border-[#C5A059]/20 bg-white object-cover p-1 shadow-sm shadow-zinc-200/50 dark:shadow-none"
+            />
+            <div>
+              <span className="block text-[9px] font-semibold uppercase tracking-[0.35em] text-zinc-500 dark:text-zinc-400">
+                Never Before
+              </span>
+              <span className="mt-1 block font-serif text-xl font-medium tracking-wide text-[#C5A059] sm:text-2xl">
+                Cosmetic
+              </span>
+            </div>
           </button>
 
           <div className="hidden items-center justify-center md:flex">

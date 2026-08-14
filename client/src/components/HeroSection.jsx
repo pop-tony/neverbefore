@@ -20,10 +20,6 @@ export default function HeroSection() {
 
       <div className="relative mx-auto grid min-h-[620px] max-w-7xl items-center gap-10 px-4 py-16 sm:px-6 lg:grid-cols-[1.2fr_0.8fr] lg:px-8 lg:py-20">
         <div className="animate-fade-up max-w-2xl text-white">
-          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.28em] text-[#F0E1B8] backdrop-blur-sm">
-            <Sparkles className="h-3.5 w-3.5" />
-            {content?.brand_name || 'Never Before'}
-          </div>
 
           <h1 className="max-w-xl text-5xl font-black leading-[0.9] tracking-[-0.06em] text-white sm:text-6xl lg:text-7xl">
             {content?.hero_title || 'Modern beauty, refined.'}
