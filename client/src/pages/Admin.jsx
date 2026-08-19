@@ -29,12 +29,15 @@ const StatCard = ({ title, value, change, icon, color }) => {
         </div>
         <span className="text-3xl">{icon}</span>
       </div>
-      {change!== undefined && (
+      {change !== undefined && change !== null && (
         <div className={`mt-4 flex items-center gap-1 text-sm font-medium ${changeColor}`}>
           <span>{Arrow}</span>
-          <span>{Math.abs(change)}%</span>
+          <span>{change > 0 ? '+' : ''}{change}%</span>
           <span className="text-zinc-500 dark:text-zinc-400">vs last period</span>
         </div>
+      )}
+      {change === null && (
+        <div className="mt-4 text-sm font-medium text-zinc-500 dark:text-zinc-400">New this period</div>
       )}
     </div>
   );
@@ -133,6 +136,8 @@ export const Admin = () => {
   const [settingsSection, setSettingsSection] = useState('brand');
   const [designatedAdminInput, setDesignatedAdminInput] = useState('');
   const homeStats = siteContent?.home_stats?.length ? siteContent.home_stats : DEFAULT_HOME_STATS;
+  const administratorUsers = users.filter((listedUser) => listedUser.isAdmin);
+  const regularUsers = users.filter((listedUser) => !listedUser.isAdmin);
   const designatedAdminEmails = siteContent?.designated_admin_emails?.length
     ? siteContent.designated_admin_emails
     : ['poptonydm@gmail.com'];
@@ -427,7 +432,7 @@ export const Admin = () => {
     });
 
     const getChange = (current, previous) => {
-      if (!previous) return current > 0? 100 : 0;
+      if (previous === 0) return current === 0 ? 0 : null;
       return +(((current - previous) / previous) * 100).toFixed(1);
     };
 
@@ -905,74 +910,40 @@ export const Admin = () => {
         {/* Overview Tab */}
         {activeTab === 'overview' && (
           <div className="space-y-8">
-            <div className="rounded-3xl border border-zinc-200 bg-gradient-to-r from-[#F6EAD2] via-white to-[#FBF7F2] p-6 shadow-sm dark:border-zinc-800 dark:from-[#1D1D1B] dark:via-[#151515] dark:to-[#111827]">
-              <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                <div>
-                  <p className="text-[10px] font-bold uppercase tracking-[0.32em] text-[#C5A059]">Performance overview</p>
-                  <h2 className="mt-3 text-3xl font-black text-zinc-900 dark:text-white">Admin Dashboard</h2>
-                </div>
-                <div className="inline-flex items-center gap-2 rounded-full border border-[#C5A059]/30 bg-white/70 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-[#C5A059] dark:bg-zinc-900/70">
-                  <span className="h-2 w-2 rounded-full bg-emerald-500" />
-                  Live data
-                </div>
-              </div>
 
-              <div className="mt-6 grid gap-4 md:grid-cols-3">
-                <div className="rounded-2xl border border-zinc-200 bg-white/80 p-4 shadow-sm dark:border-zinc-700 dark:bg-zinc-900/80">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">Revenue this week</p>
-                  <p className="mt-3 text-2xl font-black text-zinc-900 dark:text-white">{formatCurrency(analytics.thisWeekRevenue)}</p>
-                  <p className="mt-2 text-xs text-emerald-600 dark:text-emerald-400">+{analytics.totalRevenueChange || 0}% vs last week</p>
-                </div>
-                <div className="rounded-2xl border border-zinc-200 bg-white/80 p-4 shadow-sm dark:border-zinc-700 dark:bg-zinc-900/80">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">Active orders</p>
-                  <p className="mt-3 text-2xl font-black text-zinc-900 dark:text-white">{analytics.activeOrders}</p>
-                  <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">Processing and dispatch</p>
-                </div>
-                <div className="rounded-2xl border border-zinc-200 bg-white/80 p-4 shadow-sm dark:border-zinc-700 dark:bg-zinc-900/80">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">Customer base</p>
-                  <p className="mt-3 text-2xl font-black text-zinc-900 dark:text-white">{analytics.totalCustomers}</p>
-                  <p className="mt-2 text-xs text-violet-600 dark:text-violet-400">+{analytics.totalCustomersChange || 0}% growth</p>
-                </div>
-                <div className="rounded-2xl border border-zinc-200 bg-white/80 p-4 shadow-sm dark:border-zinc-700 dark:bg-zinc-900/80">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">Total orders</p>
-                  <p className="mt-3 text-2xl font-black text-zinc-900 dark:text-white">{analytics.totalOrders}</p>
-                  <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">All order statuses</p>
-                </div>
-              </div>
-            </div>
 
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
               <StatCard
                 title="Total Revenue"
                 value={formatCurrency(analytics.totalRevenue)}
-                icon="💰"
+                icon=""
                 color="bg-green-100 dark:bg-green-900/30"
               />
               <StatCard
                 title="This Week"
                 value={formatCurrency(analytics.thisWeekRevenue)}
                 change={analytics.totalRevenueChange}
-                icon="📈"
+                icon=""
                 color="bg-green-100 dark:bg-green-900/30"
               />
               <StatCard
                 title="Today's Revenue"
                 value={formatCurrency(analytics.todayRevenue)}
                 change={analytics.todayRevenueChange}
-                icon="📊"
+                icon=""
                 color="bg-blue-100 dark:bg-blue-900/30"
               />
               <StatCard
                 title="Active Orders"
                 value={analytics.activeOrders}
-                icon="📦"
+                icon=""
                 color="bg-[#C5A059]/10 dark:bg-[#C5A059]/20"
               />
               <StatCard
                 title="Customers"
                 value={analytics.totalCustomers}
                 change={analytics.totalCustomersChange}
-                icon="👥"
+                icon=""
                 color="bg-purple-100 dark:bg-purple-900/30"
               />
             </div>
@@ -1939,9 +1910,18 @@ export const Admin = () => {
                 <p className="text-sm font-semibold text-zinc-500">No users found.</p>
               </div>
             ) : (
-              <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-                <div className="overflow-x-auto">
-                  <table className="w-full">
+              <div className="space-y-6">
+                {[
+                  { title: 'Administrators', description: 'Users with admin dashboard access.', entries: administratorUsers },
+                  { title: 'Regular users', description: 'Users without admin privileges.', entries: regularUsers },
+                ].map((group) => (
+                  <section key={group.title} className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+                    <div className="border-b border-zinc-200 px-5 py-4 dark:border-zinc-800">
+                      <h3 className="text-lg font-bold text-zinc-900 dark:text-white">{group.title}</h3>
+                      <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">{group.description} {group.entries.length} user{group.entries.length === 1 ? '' : 's'}.</p>
+                    </div>
+                    <div className="overflow-x-auto">
+                      <table className="w-full">
                     <thead className="sticky top-0 z-10 border-b border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-800/50">
                       <tr>
                         <th className="px-5 py-3.5 text-left text-[11px] font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Name</th>
@@ -1950,8 +1930,8 @@ export const Admin = () => {
                         <th className="px-5 py-3.5 text-left text-[11px] font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Actions</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800/50">
-                      {users.map(u => (
+                        <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800/50">
+                      {group.entries.map(u => (
                         <tr key={u._id} className="group">
                           <td className="px-5 py-4">
                             <div className="text-sm font-semibold text-zinc-900 dark:text-white">{u.name || '—'}</div>
@@ -2006,9 +1986,11 @@ export const Admin = () => {
                           </td>
                         </tr>
                       ))}
-                    </tbody>
-                  </table>
-                </div>
+                        </tbody>
+                      </table>
+                    </div>
+                  </section>
+                ))}
               </div>
             )}
           </div>
