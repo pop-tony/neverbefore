@@ -21,6 +21,13 @@ export const defaultSiteContent = {
   hero_images: [
     'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=1600',
   ],
+  home_stats_eyebrow: 'Why choose us',
+  home_stats_title: 'Beauty routines designed for the modern muse.',
+  home_stats: [
+    { value: '500', label: 'Clean formulas', icon: 'shield' },
+    { value: '2000', label: 'Glow reviews', icon: 'star' },
+    { value: '48', label: 'Fast delivery (hours)', icon: 'truck' },
+  ],
   category_heading: 'Shop by Category',
   category_subtitle: 'Browse the collections the team wants to spotlight.',
   shop_heading: 'All Products',

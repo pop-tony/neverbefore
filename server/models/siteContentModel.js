@@ -17,6 +17,16 @@ const siteContentSchema = new mongoose.Schema({
   hero_cta_label: { type: String, default: 'Shop Now' },
   hero_cta_href: { type: String, default: '#shop' },
   hero_images: { type: [String], default: [] },
+  home_stats_eyebrow: { type: String, default: 'Why choose us' },
+  home_stats_title: { type: String, default: 'Beauty routines designed for the modern muse.' },
+  home_stats: {
+    type: [{ value: { type: String, default: '' }, label: { type: String, default: '' }, icon: { type: String, default: 'shield' } }],
+    default: [
+      { value: '500', label: 'Clean formulas', icon: 'shield' },
+      { value: '2000', label: 'Glow reviews', icon: 'star' },
+      { value: '48', label: 'Fast delivery (hours)', icon: 'truck' },
+    ],
+  },
   category_heading: { type: String, default: 'Shop by Category' },
   category_subtitle: { type: String, default: 'Browse the collections the team wants to spotlight.' },
   shop_heading: { type: String, default: 'All Products' },

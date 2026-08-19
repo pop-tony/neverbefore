@@ -16,6 +16,13 @@ const buildDefaultContent = () => ({
   hero_cta_label: 'Shop Now',
   hero_cta_href: '#shop',
   hero_images: [],
+  home_stats_eyebrow: 'Why choose us',
+  home_stats_title: 'Beauty routines designed for the modern muse.',
+  home_stats: [
+    { value: '500', label: 'Clean formulas', icon: 'shield' },
+    { value: '2000', label: 'Glow reviews', icon: 'star' },
+    { value: '48', label: 'Fast delivery (hours)', icon: 'truck' },
+  ],
   category_heading: 'Shop by Category',
   category_subtitle: 'Browse the collections the team wants to spotlight.',
   shop_heading: 'All Products',
@@ -68,6 +75,13 @@ const normalizeContent = (doc) => {
 
   if (!Array.isArray(content.designated_admin_emails) || !content.designated_admin_emails.length) {
     content.designated_admin_emails = [...DEFAULT_DESIGNATED_ADMIN_EMAILS];
+  }
+
+  if (Array.isArray(content.home_stats)) {
+    content.home_stats = content.home_stats.map((stat) => ({
+      ...stat,
+      value: String(stat?.value ?? '').replace(/[^0-9.-]/g, ''),
+    }));
   }
 
   return content;

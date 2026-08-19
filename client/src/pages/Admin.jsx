@@ -9,6 +9,11 @@ import { normalizeOrderForClient } from '../context/OrderContext';
 import { useAuth } from '../context/AuthContext';
 
 const formatCurrency = (value) => `₵${Number(value ?? 0).toLocaleString()}`;
+const DEFAULT_HOME_STATS = [
+  { value: '500', label: 'Clean formulas', icon: 'shield' },
+  { value: '2000', label: 'Glow reviews', icon: 'star' },
+  { value: '48', label: 'Fast delivery (hours)', icon: 'truck' },
+];
 
 const StatCard = ({ title, value, change, icon, color }) => {
   const isPositive = change >= 0;
@@ -127,6 +132,7 @@ export const Admin = () => {
   const [siteContent, setSiteContent] = useState(null);
   const [settingsSection, setSettingsSection] = useState('brand');
   const [designatedAdminInput, setDesignatedAdminInput] = useState('');
+  const homeStats = siteContent?.home_stats?.length ? siteContent.home_stats : DEFAULT_HOME_STATS;
   const designatedAdminEmails = siteContent?.designated_admin_emails?.length
     ? siteContent.designated_admin_emails
     : ['poptonydm@gmail.com'];
@@ -1176,6 +1182,48 @@ export const Admin = () => {
                             <option value="database">Load products from the database</option>
                           </select>
                           <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">Save all changes to apply this catalog source across the storefront.</p>
+                        </div>
+                        <div className="md:col-span-2">
+                          <div className="mb-3">
+                            <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#C5A059]">Home statistics</p>
+                            <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">Update the numbers and labels shown in the home-page statistics section.</p>
+                          </div>
+                          <div className="grid gap-4 md:grid-cols-2">
+                            <label className="space-y-1 md:col-span-2">
+                              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">Section eyebrow</span>
+                              <input value={siteContent.home_stats_eyebrow || ''} onChange={(e) => handleContentChange('home_stats_eyebrow', e.target.value)} className="w-full rounded-xl border border-zinc-300 bg-white px-3 py-3 text-sm text-zinc-900 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white" />
+                            </label>
+                            <label className="space-y-1 md:col-span-2">
+                              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">Section title</span>
+                              <input value={siteContent.home_stats_title || ''} onChange={(e) => handleContentChange('home_stats_title', e.target.value)} className="w-full rounded-xl border border-zinc-300 bg-white px-3 py-3 text-sm text-zinc-900 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white" />
+                            </label>
+                            {homeStats.map((stat, index) => (
+                              <div key={index} className="rounded-2xl border border-zinc-200 p-4 dark:border-zinc-700">
+                                <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-zinc-500">Statistic {index + 1}</p>
+                                <div className="space-y-3">
+                                  <input type="number" min="0" step="1" value={String(stat.value ?? '').replace(/[^0-9.-]/g, '')} onChange={(e) => {
+                                    const next = [...homeStats];
+                                    next[index] = { ...next[index], value: e.target.value };
+                                    handleContentChange('home_stats', next);
+                                  }} placeholder="Enter a number" className="w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-800" />
+                                  <input value={stat.label || ''} onChange={(e) => {
+                                    const next = [...homeStats];
+                                    next[index] = { ...next[index], label: e.target.value };
+                                    handleContentChange('home_stats', next);
+                                  }} placeholder="Label e.g. Clean formulas" className="w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-800" />
+                                  <select value={stat.icon || 'shield'} onChange={(e) => {
+                                    const next = [...homeStats];
+                                    next[index] = { ...next[index], icon: e.target.value };
+                                    handleContentChange('home_stats', next);
+                                  }} className="w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-800">
+                                    <option value="shield">Shield</option>
+                                    <option value="star">Star</option>
+                                    <option value="truck">Delivery truck</option>
+                                  </select>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
                         </div>
                         <div>
                           <label className="mb-1 block text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">Category heading</label>
