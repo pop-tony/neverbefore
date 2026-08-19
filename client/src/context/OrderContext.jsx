@@ -5,10 +5,54 @@ import { toast } from 'sonner';
 
 const OrderContext = createContext();
 
+export const normalizeOrderForClient = (order = {}) => {
+  const shippingAddress = order.shipping_address || {};
+  const sourceItems = order.items?.length ? order.items : order.order_items || [];
+  const items = sourceItems.map((item) => ({
+    id: item.id || item.product_id || '',
+    product_id: item.product_id || item.id || '',
+    name: item.name || item.product_name || '',
+    product_name: item.product_name || item.name || '',
+    price: Number(item.price ?? item.unit_price ?? 0),
+    unit_price: Number(item.unit_price ?? item.price ?? 0),
+    quantity: Number(item.quantity || 1),
+    image: item.image || item.product?.image_url || item.product?.image || '',
+    size: item.size || '',
+    color: item.color || '',
+  }));
+  const firstItem = items[0] || {};
+  const total = Number(order.total ?? order.total_amount ?? items.reduce((sum, item) => sum + item.price * item.quantity, 0));
+
+  return {
+    ...order,
+    items,
+    order_items: items.map((item) => ({
+      ...item,
+      product_name: item.name,
+      unit_price: item.price,
+    })),
+    total,
+    total_amount: Number(order.total_amount ?? total),
+    customerName: order.customerName || order.guest_name || shippingAddress.fullName || '',
+    itemName: order.itemName || firstItem.name || '',
+    address: order.address || shippingAddress.address || '',
+    phone: order.phone || shippingAddress.phone || '',
+    email: order.email || order.guest_email || shippingAddress.email || '',
+    quantity: Number(order.quantity ?? firstItem.quantity ?? 0),
+    price: order.price ?? String(firstItem.price || 0),
+    image: order.image || firstItem.image || '',
+    size: order.size || firstItem.size || '',
+    color: order.color || firstItem.color || '',
+    createdAt: order.createdAt || order.created_at || new Date().toISOString(),
+    updatedAt: order.updatedAt || order.updated_at || order.createdAt || order.created_at,
+    paymentRef: order.paymentRef || order.order_number || '',
+  };
+};
+
 export function OrderProvider({ children }) {
   const [orders, setOrders] = useState(() => {
     const saved = localStorage.getItem('nbc-orders');
-    return saved? JSON.parse(saved) : [];
+    return saved ? JSON.parse(saved).map(normalizeOrderForClient) : [];
   });
   const [isPolling, setIsPolling] = useState(false);
   const isInitialLoad = useRef(true);
@@ -26,9 +70,10 @@ export function OrderProvider({ children }) {
   }, [orders]);
 
   const addOrderData = (orderData) => {
+    const normalizedOrder = normalizeOrderForClient(orderData);
     setOrders(prev => {
-      if (prev.some(o => o._id === orderData._id)) return prev;
-      return [...prev, orderData];
+      if (prev.some(o => o._id === normalizedOrder._id)) return prev;
+      return [...prev, normalizedOrder];
     });
   };
 
@@ -64,7 +109,7 @@ export function OrderProvider({ children }) {
         const updated = [...prev];
         results.forEach((result, i) => {
           if (result.status === 'fulfilled' && result.value) {
-            const serverOrder = result.value;
+            const serverOrder = normalizeOrderForClient(result.value);
             const localOrder = ordersToCheck[i];
 
             // Only update if status changed
@@ -117,22 +162,26 @@ export function OrderProvider({ children }) {
             product_name: item.name || item.product_name,
             quantity: item.quantity,
             unit_price: item.price || item.unit_price,
+            image: item.image || '',
+            size: item.size || '',
+            color: item.color || '',
           })) || [],
           shipping_address: {
-            fullName: payload.customer?.name || payload.guest_name || '',
-            phone: payload.customer?.phone || '',
-            address: payload.customer?.address || '',
-            email: payload.customer?.email || payload.guest_email || '',
+            fullName: payload.customer?.name || payload.shipping_address?.fullName || payload.guest_name || '',
+            phone: payload.customer?.phone || payload.shipping_address?.phone || '',
+            address: payload.customer?.address || payload.shipping_address?.address || '',
+            email: payload.customer?.email || payload.shipping_address?.email || payload.guest_email || '',
           },
-          guest_email: payload.customer?.email || payload.guest_email || '',
-          guest_name: payload.customer?.name || payload.guest_name || '',
+          guest_email: payload.customer?.email || payload.shipping_address?.email || payload.guest_email || '',
+          guest_name: payload.customer?.name || payload.shipping_address?.fullName || payload.guest_name || '',
+          status: payload.status || 'pending',
           notes: payload.notes || 'Synced order',
           order_number: payload.paymentRef || payload.order_number,
         };
 
         const res = await axios.post(`${backendUrl}/order/orders`, normalizedPayload);
         if (res.data.success) {
-          return { oldId: _id, newOrder: res.data.order || res.data.data || payload };
+          return { oldId: _id, newOrder: normalizeOrderForClient(res.data.order || res.data.data || payload) };
         }
         throw new Error(res.data.message);
       })

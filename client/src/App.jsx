@@ -23,10 +23,11 @@ import AuthPage from './pages/AuthPage'
 
 function AppContent() {
   return (
-    <div className="flex min-h-screen flex-col bg-white dark:bg-black">
-      <NavBar />
-      <main className="flex-1">
-        <Routes>
+    <OrderProvider>
+      <div className="flex min-h-screen flex-col bg-white dark:bg-black">
+        <NavBar />
+        <main className="flex-1">
+          <Routes>
           <Route path='/' element={<Home />} />
           <Route path='/shop' element={<ShopPage />} />
           <Route path='/lookbook' element={<Lookbook />} />
@@ -41,10 +42,11 @@ function AppContent() {
           <Route path='/about' element={<AboutUs />} />
           <Route path='/terms' element={<Terms />} />
           <Route path='/privacy' element={<PrivacyPolicy />} />
-        </Routes>
-      </main>
-      <Footer />
-    </div>
+          </Routes>
+        </main>
+        <Footer />
+      </div>
+    </OrderProvider>
   )
 }
 
@@ -52,11 +54,9 @@ function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <OrderProvider>
-          <CartProvider>
-            <AppContent />
-          </CartProvider>
-        </OrderProvider>
+        <CartProvider>
+          <AppContent />
+        </CartProvider>
       </AuthProvider>
     </ThemeProvider>
   )

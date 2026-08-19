@@ -5,6 +5,9 @@ const orderItemSchema = new mongoose.Schema({
     product_name: {type: String, default: ''},
     quantity: {type: Number, default: 1},
     unit_price: {type: Number, default: 0},
+    image: {type: String, default: ''},
+    size: {type: String, default: ''},
+    color: {type: String, default: ''},
     created_at: {type: Date, default: Date.now},
 }, { _id: true });
 

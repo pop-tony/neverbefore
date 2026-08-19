@@ -117,20 +117,26 @@ export default function Cart() {
 
   const createOrder = async (reference, items, total) => {
     const orderData = {
-      customer: customerInfo,
       items: items.map(item => ({
-        id: item.id,
-        name: item.name,
-        price: item.price,
+        product_id: String(item.id),
+        product_name: item.name,
+        unit_price: Number(item.price),
         quantity: item.quantity,
-        size: item.size,
-        color: item.color,
-        image: item.image
+        image: item.image || '',
+        size: item.size || '',
+        color: item.color || '',
       })),
-      total,
-      paymentRef: reference,
+      shipping_address: {
+        fullName: customerInfo.name,
+        email: customerInfo.email,
+        phone: customerInfo.phone,
+        address: customerInfo.address,
+      },
+      guest_name: customerInfo.name,
+      guest_email: customerInfo.email,
       status: 'paid',
-      createdAt: new Date().toISOString(),
+      notes: `Payment reference: ${reference}`,
+      order_number: reference,
     };
 
     try {
@@ -138,14 +144,18 @@ export default function Cart() {
 
       if (res.data.success) {
         toast.success("Order placed successfully!");
-        addOrderData(res.data.data);
+        addOrderData(res.data.order || res.data.data);
         items.forEach(item => removeFromCart(item.cartItemId));
         return true;
       } else {
         throw new Error(res.data.message || 'Server rejected order');
       }
     } catch (error) {
-      console.error('API failed, saving order locally:', error);
+      console.error('Order creation failed:', {
+        message: error.message,
+        status: error.response?.status,
+        response: error.response?.data,
+      });
       const localOrder = {
        ...orderData,
         status: 'pending_sync',

@@ -1,13 +1,14 @@
 import ProductCard from './ProductCard';
-import { allProducts } from '../data/products';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { useSiteContent } from '../hooks/useSiteContent';
+import { useProducts } from '../hooks/useProducts';
 
 export default function ShopSection() {
   const navigate = useNavigate();
   const { content } = useSiteContent();
-  const featured = allProducts.filter(p => p.featured === true).slice(0, 4);
+  const { products, loading } = useProducts();
+  const featured = products.filter(p => p.featured === true).slice(0, 4);
 
   return (
     <section className="bg-[#F8F5F1] px-4 py-20 text-zinc-900 dark:bg-[#0C0C0E] dark:text-white">
@@ -29,7 +30,7 @@ export default function ShopSection() {
         </div>
 
         <div className="grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-4">
-          {featured.map(product => (
+          {loading ? <p className="col-span-full text-sm text-zinc-500">Loading products...</p> : featured.map(product => (
             <div key={product.id} className="store-card">
               <ProductCard product={product} />
             </div>

@@ -25,6 +25,7 @@ export const defaultSiteContent = {
   category_subtitle: 'Browse the collections the team wants to spotlight.',
   shop_heading: 'All Products',
   shop_subheading: 'Search and filter the latest catalog.',
+  product_source: 'mock',
   empty_title: 'No products yet',
   empty_message: 'Check back soon for new arrivals!',
   footer_note: 'Never Before Cosmetics by Madam Jozy',

@@ -12,7 +12,7 @@ orderRouter.put('/orders/:id/status', adminAuth, updateOrder);
 
 orderRouter.get('/data', getOrderData);
 orderRouter.get('/i-data', getOrderDataIndividual);
-orderRouter.get('/c-data', getConsultData);
+orderRouter.get('/c-data', getConsultData); 
 orderRouter.post('/create-order', createOrder);
 orderRouter.post('/create-orderA', createOrderA);
 orderRouter.post('/consult', createConsult);

@@ -21,6 +21,7 @@ const siteContentSchema = new mongoose.Schema({
   category_subtitle: { type: String, default: 'Browse the collections the team wants to spotlight.' },
   shop_heading: { type: String, default: 'All Products' },
   shop_subheading: { type: String, default: 'Search and filter the latest catalog.' },
+  product_source: { type: String, enum: ['mock', 'database'], default: 'mock' },
   empty_title: { type: String, default: 'No products yet' },
   empty_message: { type: String, default: 'Check back soon for new arrivals!' },
   footer_note: { type: String, default: 'Never Before Cosmetics by Madam Jozy' },

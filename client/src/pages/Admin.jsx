@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import { MapPin, Phone, Mail, Calendar, CreditCard, Package, Truck, CheckCircle, Clock, AlertCircle, RefreshCw, ShoppingBag, XCircle, RotateCcw, Search, ChevronDown, ChevronUp, X, Plus, Trash2, Edit } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { setSiteContentCache } from '../hooks/useSiteContent';
+import { normalizeOrderForClient } from '../context/OrderContext';
 
 const formatCurrency = (value) => `₵${Number(value ?? 0).toLocaleString()}`;
 
@@ -115,7 +116,7 @@ export const Admin = () => {
   const [productsLoading, setProductsLoading] = useState(false);
   const [showProductForm, setShowProductForm] = useState(false);
   const [productForm, setProductForm] = useState({
-    name: '', price: '', quantity: '', description: '', brand: '', color: '', discount: '0',
+    name: '', price: '', quantity: '', description: '', brand: '', color: '', category: '', discount: '0',
     image: null, video: null, imagePreview: null, featured: false, topSell: false
   });
 
@@ -186,7 +187,7 @@ export const Admin = () => {
 
   const handleCreateProduct = async (e) => {
     e.preventDefault();
-    const { name, price, quantity, image, description, brand, color, discount, featured, topSell } = productForm;
+    const { name, price, quantity, image, description, brand, color, category, discount, featured, topSell } = productForm;
     if (!name || !price || !quantity || !image) {
       toast.error('Name, price, quantity and image are required');
       return;
@@ -201,6 +202,7 @@ export const Admin = () => {
         description,
         brand,
         color,
+        category,
         discount: Number(discount) || 0,
         featured: !!featured,
         topSell: !!topSell,
@@ -208,7 +210,7 @@ export const Admin = () => {
       if (res.data.success) {
         toast.success('Product created successfully!');
         setShowProductForm(false);
-        setProductForm({ name: '', price: '', quantity: '', description: '', brand: '', color: '', discount: '0', image: null, video: null, imagePreview: null, featured: false, topSell: false });
+        setProductForm({ name: '', price: '', quantity: '', description: '', brand: '', color: '', category: '', discount: '0', image: null, video: null, imagePreview: null, featured: false, topSell: false });
         fetchProducts();
       } else {
         toast.error(res.data.message || 'Failed to create product');
@@ -250,7 +252,7 @@ export const Admin = () => {
       try {
         const res = await axios.get(`${backendUrl}/order/orders`, { withCredentials: true });
         if (res.data.success) {
-          setOrders(res.data.orders);
+          setOrders((res.data.orders || []).map(normalizeOrderForClient));
         }
       } catch (error) {
         console.error(error);
@@ -341,6 +343,7 @@ export const Admin = () => {
         todayRevenue: 0,
         todayRevenueChange: 0,
         activeOrders: 0,
+        totalOrders: 0,
         totalCustomers: 0,
         totalCustomersChange: 0,
         revenueData: [],
@@ -375,7 +378,7 @@ export const Admin = () => {
     const lastWeekCustomerEmails = new Set();
 
     orders.forEach(o => {
-      const d = new Date(o.createdAt);
+      const d = new Date(o.createdAt || o.created_at);
       const isCancelled = ['cancelled', 'returned'].includes(o.status);
 
       if (!isCancelled) {
@@ -398,9 +401,9 @@ export const Admin = () => {
         });
         if (dayIdx!== -1) last7Days[dayIdx].revenue += o.total || 0;
 
-        const items = o.items || [{ itemName: o.itemName, quantity: o.quantity || 1, price: o.total }];
+        const items = o.items?.length ? o.items : [{ name: o.itemName, quantity: o.quantity || 1, price: o.total }];
         items.forEach(item => {
-          const name = item.itemName || 'Unknown';
+          const name = item.name || item.product_name || item.itemName || 'Unknown';
           if (!salesByItem[name]) salesByItem[name] = { name, value: 0 };
           salesByItem[name].value += item.quantity || 1;
         });
@@ -421,6 +424,7 @@ export const Admin = () => {
       todayRevenue: Math.round(todayRevenue),
       todayRevenueChange: getChange(todayRevenue, yesterdayRevenue),
       activeOrders,
+      totalOrders: orders.length,
       totalCustomers: customers.length,
       totalCustomersChange: getChange(thisWeekCustomerEmails.size, lastWeekCustomerEmails.size),
       revenueData: last7Days.map(d => ({ day: d.day, revenue: Math.round(d.revenue) })),
@@ -494,7 +498,7 @@ export const Admin = () => {
     try {
       const res = await axios.get(`${backendUrl}/order/orders`, { withCredentials: true });
       if (res.data.success) {
-        setOrders(res.data.orders);
+        setOrders((res.data.orders || []).map(normalizeOrderForClient));
         toast.success('Orders refreshed');
       }
     } catch (error) {
@@ -915,6 +919,11 @@ export const Admin = () => {
                   <p className="mt-3 text-2xl font-black text-zinc-900 dark:text-white">{analytics.totalCustomers}</p>
                   <p className="mt-2 text-xs text-violet-600 dark:text-violet-400">+{analytics.totalCustomersChange || 0}% growth</p>
                 </div>
+                <div className="rounded-2xl border border-zinc-200 bg-white/80 p-4 shadow-sm dark:border-zinc-700 dark:bg-zinc-900/80">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">Total orders</p>
+                  <p className="mt-3 text-2xl font-black text-zinc-900 dark:text-white">{analytics.totalOrders}</p>
+                  <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">All order statuses</p>
+                </div>
               </div>
             </div>
 
@@ -1148,6 +1157,18 @@ export const Admin = () => {
                           <label className="mb-1 block text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">Shop subheading</label>
                           <input value={siteContent.shop_subheading || ''} onChange={(e) => handleContentChange('shop_subheading', e.target.value)} className="w-full rounded-xl border border-zinc-300 bg-white px-3 py-3 text-sm text-zinc-900 focus:border-[#C5A059] focus:outline-none focus:ring-2 focus:ring-[#C5A059]/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white" />
                         </div>
+                        <div className="md:col-span-2">
+                          <label className="mb-1 block text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">Product data source</label>
+                          <select
+                            value={siteContent.product_source || 'mock'}
+                            onChange={(e) => handleContentChange('product_source', e.target.value)}
+                            className="w-full rounded-xl border border-zinc-300 bg-white px-3 py-3 text-sm text-zinc-900 focus:border-[#C5A059] focus:outline-none focus:ring-2 focus:ring-[#C5A059]/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white"
+                          >
+                            <option value="mock">Use mock products from the app</option>
+                            <option value="database">Load products from the database</option>
+                          </select>
+                          <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">Save all changes to apply this catalog source across the storefront.</p>
+                        </div>
                         <div>
                           <label className="mb-1 block text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">Category heading</label>
                           <input value={siteContent.category_heading || ''} onChange={(e) => handleContentChange('category_heading', e.target.value)} className="w-full rounded-xl border border-zinc-300 bg-white px-3 py-3 text-sm text-zinc-900 focus:border-[#C5A059] focus:outline-none focus:ring-2 focus:ring-[#C5A059]/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white" />
@@ -1327,6 +1348,16 @@ export const Admin = () => {
                           onChange={(e) => setProductForm(prev => ({ ...prev, brand: e.target.value }))}
                           className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-800"
                           placeholder="Brand name"
+                        />
+                      </div>
+                      <div>
+                        <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-zinc-500">Category</label>
+                        <input
+                          type="text"
+                          value={productForm.category}
+                          onChange={(e) => setProductForm(prev => ({ ...prev, category: e.target.value }))}
+                          className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-800"
+                          placeholder="Skincare, Makeup, Body..."
                         />
                       </div>
                       <div>

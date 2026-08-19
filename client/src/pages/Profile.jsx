@@ -31,6 +31,12 @@ export default function ProfilePage() {
       })
     : 'Not available';
 
+  const profileCompletion = useMemo(() => {
+    const fields = [user?.name, user?.username, user?.email, user?.number];
+    const completedFields = fields.filter((value) => value !== undefined && value !== null && String(value).trim()).length;
+    return Math.round((completedFields / fields.length) * 100);
+  }, [user]);
+
   const handleChange = (field, value) => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
@@ -223,9 +229,16 @@ export default function ProfilePage() {
           <div className="rounded-[28px] border border-dashed border-[#C5A059]/35 bg-[#F9F5EF] p-6 dark:border-[#C5A059]/30 dark:bg-[#1C1917]">
             <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-[#8B6D36] dark:text-[#E8D29E]">Account status</p>
             <div className="mt-4 flex items-center justify-between rounded-2xl bg-white px-4 py-3 shadow-sm dark:bg-zinc-900">
-              <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Profile complete</span>
-              <span className="text-sm font-black text-[#C5A059]">{user ? '100%' : '0%'}</span>
+              <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                {profileCompletion === 100 ? 'Profile complete' : 'Profile incomplete'}
+              </span>
+              <span className={`text-sm font-black ${profileCompletion === 100 ? 'text-emerald-600 dark:text-emerald-400' : 'text-[#C5A059]'}`}>
+                {profileCompletion}%
+              </span>
             </div>
+            {profileCompletion < 100 && (
+              <p className="mt-3 text-xs text-[#8B6D36] dark:text-[#E8D29E]">Add your missing profile details to complete your account.</p>
+            )}
           </div>
         </aside>
       </div>

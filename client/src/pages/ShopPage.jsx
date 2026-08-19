@@ -2,9 +2,9 @@ import { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
 import CategoryFilter from '../components/CategoryFilter';
-import { allProducts } from '../data/products';
 import { Search, X, ChevronDown, ChevronUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useProducts } from '../hooks/useProducts';
 
 // Never Before Cosmetic categories
 const categories = ['All', 'Skincare', 'Makeup', 'Lips', 'Fragrance', 'Body', 'New Alchemy'];
@@ -20,6 +20,7 @@ export default function ShopPage() {
   const [searchInput, setSearchInput] = useState(urlSearch);
   const [debouncedSearch, setDebouncedSearch] = useState(urlSearch);
   const [showAll, setShowAll] = useState({});
+  const { products, loading, error } = useProducts();
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -45,7 +46,7 @@ export default function ShopPage() {
   const isFiltered = activeCategory!== 'All' || isSearching;
 
   const filtered = useMemo(() => {
-    let result = allProducts;
+    let result = products;
     if (activeCategory!== 'All') {
       result = result.filter(p => p.category === activeCategory);
     }
@@ -60,7 +61,7 @@ export default function ShopPage() {
       );
     }
     return result;
-  }, [activeCategory, debouncedSearch, isSearching]);
+  }, [activeCategory, debouncedSearch, isSearching, products]);
 
   // Cosmetic sections for "All" view
   const sections = useMemo(() => {
@@ -70,40 +71,40 @@ export default function ShopPage() {
         title: "New Alchemy",
         subtitle: "Never seen before",
         category: 'New Alchemy',
-        products: allProducts.filter(p => p.tags?.includes('new') || p.new)
+        products: products.filter(p => p.tags?.includes('new') || p.new)
       },
       {
         title: "Skin Rituals",
         subtitle: "Gold-standard skincare",
         category: 'Skincare',
-        products: allProducts.filter(p => p.category === 'Skincare')
+        products: products.filter(p => p.category === 'Skincare')
       },
       {
         title: "Velvet Complexion",
         subtitle: "Soft-focus finish",
         category: 'Makeup',
-        products: allProducts.filter(p => p.category === 'Makeup')
+        products: products.filter(p => p.category === 'Makeup')
       },
       {
         title: "Lips Atelier",
         subtitle: "Your signature shade",
         category: 'Lips',
-        products: allProducts.filter(p => p.category === 'Lips')
+        products: products.filter(p => p.category === 'Lips')
       },
       {
         title: "Essence",
         subtitle: "Fragrance as memory",
         category: 'Fragrance',
-        products: allProducts.filter(p => p.category === 'Fragrance')
+        products: products.filter(p => p.category === 'Fragrance')
       },
       {
         title: "Body Luminous",
         subtitle: "Gilded from within",
         category: 'Body',
-        products: allProducts.filter(p => p.category === 'Body')
+        products: products.filter(p => p.category === 'Body')
       },
     ].filter(s => s.products.length > 0);
-  }, [isFiltered]);
+  }, [isFiltered, products]);
 
   const handleCategoryChange = (cat) => {
     setActiveCategory(cat);
@@ -144,6 +145,8 @@ export default function ShopPage() {
               ? `${filtered.length} formulas in ${activeCategory}`
                 : 'Curated rituals for skin that glows like never before'}
             </p>
+            {loading && <p className="mt-2 text-xs text-zinc-500">Loading catalog...</p>}
+            {error && <p className="mt-2 text-xs text-red-500">Unable to load products from the database.</p>}
             {isFiltered && filtered.length > 0 && (
               <p className="mt-2 text-xs uppercase tracking-[0.15em] text-[#C5A059]">{filtered.length} formulas found</p>
             )}

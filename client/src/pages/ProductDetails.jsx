@@ -2,12 +2,13 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { Heart, ChevronLeft, Minus, Plus, Truck, RotateCcw } from 'lucide-react';
-import { allProducts } from '../data/products';
+import { useProducts } from '../hooks/useProducts';
 
 export default function ProductDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { addToCart } = useCart();
+  const { products: allProducts, loading } = useProducts();
 
   const product = allProducts.find(p => p.id == id);
 
@@ -26,6 +27,10 @@ export default function ProductDetail() {
     }
     window.scrollTo(0, 0);
   }, [product]);
+
+  if (loading) {
+    return <div className="flex h-screen items-center justify-center bg-white text-zinc-500 dark:bg-black">Loading product...</div>;
+  }
 
   if (!product) {
     return (

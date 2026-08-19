@@ -2,6 +2,7 @@ import consultModel from "../models/consultationModel.js";
 import orderAModel from "../models/orderAModel.js";
 import orderModel from "../models/orderModel.js";
 import productModel from "../models/productsModel.js";
+import mongoose from "mongoose";
 import { logError, logInfo } from '../utils/logger.js';
 
 const toNumber = (value, fallback = 0) => {
@@ -127,27 +128,58 @@ const SAMPLE_CONSULTS = [
   },
 ];
 
-const normalizeOrder = (order) => ({
+const normalizeOrder = (order) => {
+  const shippingAddress = order.shipping_address || {};
+  const sourceItems = order.order_items?.length ? order.order_items : order.items || [];
+  const orderItems = sourceItems.map((item) => ({
+    _id: item._id ? item._id.toString() : item.id || '',
+    id: item._id ? item._id.toString() : item.id || item.product_id || '',
+    product_id: item.product_id || item.id || '',
+    product_name: item.product_name || item.name || '',
+    quantity: toNumber(item.quantity, 0),
+    unit_price: toNumber(item.unit_price ?? item.price, 0),
+    image: item.image || item.product?.image_url || item.product?.image || '',
+    size: item.size || '',
+    color: item.color || '',
+    created_at: toIsoString(item.created_at),
+    product: item.product || undefined,
+  }));
+  const firstItem = orderItems[0] || {};
+  const totalAmount = toNumber(order.total_amount ?? order.total, orderItems.reduce((sum, item) => sum + item.unit_price * item.quantity, 0));
+
+  return {
   _id: order._id.toString(),
   id: order._id.toString(),
   user_id: order.user_id ?? null,
-  guest_email: order.guest_email ?? null,
-  guest_name: order.guest_name ?? null,
+  guest_email: order.guest_email ?? order.email ?? shippingAddress.email ?? null,
+  guest_name: order.guest_name ?? order.customerName ?? shippingAddress.fullName ?? null,
   order_number: order.order_number || order.paymentRef || generateOrderNumber(),
   status: order.status || 'pending',
-  total_amount: toNumber(order.total_amount ?? order.total ?? 0),
-  shipping_address: order.shipping_address || null,
+  total_amount: totalAmount,
+  total: totalAmount,
+  shipping_address: shippingAddress,
   notes: order.notes || null,
-  order_items: (order.order_items || []).map((item) => ({
-    _id: item._id ? item._id.toString() : item.id || '',
-    id: item._id ? item._id.toString() : item.id || '',
-    product_id: item.product_id || '',
-    product_name: item.product_name || '',
-    quantity: toNumber(item.quantity, 0),
-    unit_price: toNumber(item.unit_price, 0),
-    created_at: toIsoString(item.created_at),
-    product: item.product || undefined,
+  order_items: orderItems,
+  items: orderItems.map((item) => ({
+    id: item.product_id || item.id,
+    name: item.product_name,
+    price: item.unit_price,
+    quantity: item.quantity,
+    image: item.image,
+    size: item.size,
+    color: item.color,
   })),
+  customerName: order.customerName || shippingAddress.fullName || order.guest_name || '',
+  itemName: order.itemName || firstItem.product_name || '',
+  address: order.address || shippingAddress.address || '',
+  price: order.price ?? String(firstItem.unit_price || 0),
+  phone: order.phone || shippingAddress.phone || '',
+  email: order.email || order.guest_email || shippingAddress.email || '',
+  quantity: order.quantity ?? firstItem.quantity ?? 0,
+  paymentRef: order.paymentRef || order.order_number || '',
+  image: order.image || firstItem.image || '',
+  size: order.size || firstItem.size || '',
+  color: order.color || firstItem.color || '',
   order_status_history: (order.order_status_history || []).map((entry) => ({
     _id: entry._id ? entry._id.toString() : entry.id || '',
     id: entry._id ? entry._id.toString() : entry.id || '',
@@ -159,7 +191,10 @@ const normalizeOrder = (order) => ({
   })),
   created_at: toIsoString(order.createdAt || order.created_at),
   updated_at: toIsoString(order.updatedAt || order.updated_at || order.createdAt || order.created_at),
-});
+  createdAt: toIsoString(order.createdAt || order.created_at),
+  updatedAt: toIsoString(order.updatedAt || order.updated_at || order.createdAt || order.created_at),
+  };
+};
 
 const buildLegacyFallbackOrder = (payload, productLookup, user) => {
   const firstItem = payload.items?.[0];
@@ -171,7 +206,7 @@ const buildLegacyFallbackOrder = (payload, productLookup, user) => {
 
   return {
     customerName: fullName,
-    itemName: firstProduct?.name || firstItem?.product_id || 'Item',
+    itemName: firstProduct?.name || firstItem?.product_name || firstItem?.product_id || 'Item',
     address: shippingAddress.address || '',
     price: String(totalAmount),
     phone: shippingAddress.phone || '',
@@ -180,7 +215,7 @@ const buildLegacyFallbackOrder = (payload, productLookup, user) => {
     total: totalAmount,
     total_amount: totalAmount,
     paymentRef: payload.order_number || generateOrderNumber(),
-    status: 'pending',
+    status: payload.status || 'pending',
     color: firstProduct?.color || '',
     image: firstProduct?.image_url || firstProduct?.image || '',
     size: '',
@@ -192,9 +227,12 @@ const buildLegacyFallbackOrder = (payload, productLookup, user) => {
     notes: payload.notes || '',
     order_items: payload.items.map((item) => ({
       product_id: item.product_id,
-      product_name: productLookup.get(item.product_id)?.name || '',
+      product_name: productLookup.get(item.product_id)?.name || item.product_name || '',
       quantity: toNumber(item.quantity, 1),
       unit_price: toNumber(item.unit_price, 0),
+      image: item.image || '',
+      size: item.size || '',
+      color: item.color || '',
       created_at: new Date(),
     })),
     order_status_history: [{
@@ -252,13 +290,16 @@ export const createConsult = async (req, res) => {
 }
 
 export const createOrder = async (req, res) => {
-
+ 
   try {
     if (Array.isArray(req.body.items)) {
       const items = req.body.items;
       const shippingAddress = req.body.shipping_address || null;
       const productIds = items.map((item) => item.product_id).filter(Boolean);
-      const products = await productModel.find({ _id: { $in: productIds } });
+      const databaseProductIds = productIds.filter((productId) => mongoose.Types.ObjectId.isValid(productId));
+      const products = databaseProductIds.length
+        ? await productModel.find({ _id: { $in: databaseProductIds } })
+        : [];
       const productLookup = new Map(products.map((product) => [product._id.toString(), product]));
       const orderPayload = {
         items,
@@ -268,9 +309,15 @@ export const createOrder = async (req, res) => {
         guest_name: req.body.guest_name || null,
         notes: req.body.notes || '',
         order_number: req.body.order_number || generateOrderNumber(),
+        status: req.body.status || 'pending',
       };
 
       if (!items.length || !shippingAddress) {
+        logError('Create order validation failed', new Error('Missing items or shipping address'), {
+          path: req.originalUrl,
+          hasItems: items.length > 0,
+          hasShippingAddress: Boolean(shippingAddress),
+        });
         return res.status(400).json({ success: false, message: 'Missing Required Details' });
       }
 
