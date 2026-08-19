@@ -6,6 +6,7 @@ import { MapPin, Phone, Mail, Calendar, CreditCard, Package, Truck, CheckCircle,
 import { motion, AnimatePresence } from 'framer-motion';
 import { setSiteContentCache } from '../hooks/useSiteContent';
 import { normalizeOrderForClient } from '../context/OrderContext';
+import { useAuth } from '../context/AuthContext';
 
 const formatCurrency = (value) => `₵${Number(value ?? 0).toLocaleString()}`;
 
@@ -98,6 +99,7 @@ const ORDER_STATUS_GROUPS = {
 };
 
 export const Admin = () => {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('overview');
   const [orderStatusFilter, setOrderStatusFilter] = useState('all');
   const [orders, setOrders] = useState([]);
@@ -124,6 +126,10 @@ export const Admin = () => {
   const backendUrl = configuredBase.endsWith('/api') ? configuredBase : `${configuredBase}/api`;
   const [siteContent, setSiteContent] = useState(null);
   const [settingsSection, setSettingsSection] = useState('brand');
+  const [designatedAdminInput, setDesignatedAdminInput] = useState('');
+  const designatedAdminEmails = siteContent?.designated_admin_emails || [];
+  const currentUserEmail = user?.email?.trim().toLowerCase();
+  const canManageAdmins = designatedAdminEmails.some((email) => email.trim().toLowerCase() === currentUserEmail);
 
   const settingSections = [
     { id: 'brand', label: 'Brand & home', description: 'Hero and identity' },
@@ -1261,6 +1267,56 @@ export const Admin = () => {
                         <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#C5A059]">Access</p>
                         <h3 className="mt-2 text-2xl font-black text-zinc-900 dark:text-white">Admin messaging</h3>
                       </div>
+                      {canManageAdmins && (
+                        <div className="rounded-2xl border border-[#C5A059]/30 bg-[#C5A059]/5 p-4 dark:bg-[#C5A059]/10">
+                          <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#8B6D36] dark:text-[#E8D29E]">Designated admins</p>
+                          <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-300">Designated admins can manage admin access. You may add another designated admin or revoke only your own designation.</p>
+                          <div className="mt-4 space-y-2">
+                            {designatedAdminEmails.map((email) => (
+                              <div key={email} className="flex items-center justify-between rounded-xl bg-white px-3 py-2 text-sm dark:bg-zinc-900">
+                                <span className="font-semibold text-zinc-800 dark:text-zinc-200">{email}</span>
+                                {email.trim().toLowerCase() === currentUserEmail && designatedAdminEmails.length > 1 && (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleContentChange('designated_admin_emails', designatedAdminEmails.filter((item) => item.trim().toLowerCase() !== currentUserEmail))}
+                                    className="text-xs font-bold text-red-600 hover:text-red-700 dark:text-red-400"
+                                  >
+                                    Revoke my designation
+                                  </button>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                          <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+                            <input
+                              type="email"
+                              value={designatedAdminInput}
+                              onChange={(e) => setDesignatedAdminInput(e.target.value)}
+                              placeholder="new-admin@example.com"
+                              className="min-w-0 flex-1 rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const email = designatedAdminInput.trim().toLowerCase();
+                                if (!email || !email.includes('@')) {
+                                  toast.error('Enter a valid admin email');
+                                  return;
+                                }
+                                if (designatedAdminEmails.some((item) => item.trim().toLowerCase() === email)) {
+                                  toast.error('That email is already designated');
+                                  return;
+                                }
+                                handleContentChange('designated_admin_emails', [...designatedAdminEmails, email]);
+                                setDesignatedAdminInput('');
+                              }}
+                              className="rounded-xl bg-[#C5A059] px-4 py-2 text-sm font-bold text-white hover:bg-[#B08D4F]"
+                            >
+                              Add designated admin
+                            </button>
+                          </div>
+                        </div>
+                      )}
                       <div className="grid gap-4 md:grid-cols-2">
                         <div className="md:col-span-2">
                           <label className="mb-1 block text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">Access title</label>
@@ -1858,7 +1914,8 @@ export const Admin = () => {
                           </td>
                           <td className="px-5 py-4">
                             <div className="flex gap-2">
-                              <button
+                              {canManageAdmins && (
+                                <button
                                 onClick={async () => {
                                   try {
                                     const res = await axios.put(`${backendUrl}/admin/users/${u._id}`, { isAdmin: !u.isAdmin }, { withCredentials: true });
@@ -1875,8 +1932,10 @@ export const Admin = () => {
                                 style={{ background: u.isAdmin? '#ef4444' : '#10b981' }}
                               >
                                 {u.isAdmin? 'Revoke Admin' : 'Make Admin'}
-                              </button>
-                              <button
+                                </button>
+                              )}
+                              {canManageAdmins && (
+                                <button
                                 onClick={async () => {
                                   if (!window.confirm('Delete this user?')) return;
                                   try {
@@ -1891,7 +1950,8 @@ export const Admin = () => {
                                   }
                                 }}
                                 className="rounded-lg px-3 py-1 text-sm font-semibold text-white bg-red-600"
-                              >Delete</button>
+                                >Delete</button>
+                              )}
                             </div>
                           </td>
                         </tr>

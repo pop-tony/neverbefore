@@ -1,7 +1,18 @@
 import userModel from '../models/userModel.js';
 import productModel from '../models/productsModel.js';
 import orderAModel from '../models/orderAModel.js';
+import siteContentModel from '../models/siteContentModel.js';
 import { logError, logInfo } from '../utils/logger.js';
+
+const DEFAULT_DESIGNATED_ADMIN_EMAILS = ['poptonydm@gmail.com'];
+
+const isDesignatedAdmin = async (email) => {
+  const content = await siteContentModel.findOne({ key: 'primary' }).select('designated_admin_emails').lean();
+  const designatedEmails = content?.designated_admin_emails?.length
+    ? content.designated_admin_emails
+    : DEFAULT_DESIGNATED_ADMIN_EMAILS;
+  return designatedEmails.some((designatedEmail) => designatedEmail.trim().toLowerCase() === email?.trim().toLowerCase());
+};
 
 const SAMPLE_USERS = [
   {
@@ -61,6 +72,18 @@ export const updateUser = async (req, res) => {
   try {
     const update = { ...req.body };
     if (update.password) delete update.password; // don't allow password change here
+
+    if (Object.prototype.hasOwnProperty.call(update, 'isAdmin')) {
+      if (!(await isDesignatedAdmin(req.user?.email))) {
+        logInfo('Admin role change denied', {
+          actorId: req.user?.id,
+          targetUserId: req.params.id,
+          path: req.originalUrl,
+        });
+        return res.status(403).json({ success: false, message: 'Only the designated admin can grant or revoke admin access' });
+      }
+    }
+
     const user = await userModel.findByIdAndUpdate(req.params.id, update, { new: true }).select('-password');
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
     logInfo('Admin updated user', {
@@ -78,6 +101,15 @@ export const updateUser = async (req, res) => {
 
 export const deleteUser = async (req, res) => {
   try {
+    if (!(await isDesignatedAdmin(req.user?.email))) {
+      logInfo('User deletion denied', {
+        actorId: req.user?.id,
+        targetUserId: req.params.id,
+        path: req.originalUrl,
+      });
+      return res.status(403).json({ success: false, message: 'Only the designated admin can delete users' });
+    }
+
     await userModel.deleteOne({ _id: req.params.id });
     logInfo('Admin deleted user', {
       userId: req.params.id,

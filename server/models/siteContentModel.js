@@ -39,6 +39,7 @@ const siteContentSchema = new mongoose.Schema({
   admin_access_title: { type: String, default: 'Access Denied' },
   admin_access_message: { type: String, default: 'You need administrator privileges to access this page.' },
   admin_access_note: { type: String, default: 'Contact Madam Jozy to request admin access.' },
+  designated_admin_emails: { type: [String], default: ['poptonydm@gmail.com'] },
   categories: { type: [siteCategorySchema], default: [] },
 }, { timestamps: true });
 

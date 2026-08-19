@@ -3,6 +3,7 @@ import cloudinary from '../lib/cloudinary.js';
 import { logError } from '../utils/logger.js';
 
 const DEFAULT_KEY = 'primary';
+const DEFAULT_DESIGNATED_ADMIN_EMAILS = ['poptonydm@gmail.com'];
 
 const buildDefaultContent = () => ({
   key: DEFAULT_KEY,
@@ -37,6 +38,7 @@ const buildDefaultContent = () => ({
   admin_access_title: 'Access Denied',
   admin_access_message: 'You need administrator privileges to access this page.',
   admin_access_note: 'Contact Madam Jozy to request admin access.',
+  designated_admin_emails: DEFAULT_DESIGNATED_ADMIN_EMAILS,
   categories: [],
 });
 
@@ -82,6 +84,32 @@ export const updateSiteContent = async (req, res) => {
   try {
     const existing = await siteContentModel.findOne({ key: DEFAULT_KEY });
     const body = req.body || {};
+    const existingDesignatedAdmins = (existing?.designated_admin_emails?.length
+      ? existing.designated_admin_emails
+      : DEFAULT_DESIGNATED_ADMIN_EMAILS
+    ).map((email) => email.trim().toLowerCase());
+
+    if (Object.prototype.hasOwnProperty.call(body, 'designated_admin_emails')) {
+      const actorEmail = req.user?.email?.trim().toLowerCase();
+      const requestedDesignatedAdmins = Array.isArray(body.designated_admin_emails)
+        ? [...new Set(body.designated_admin_emails.map((email) => String(email).trim().toLowerCase()).filter(Boolean))]
+        : [];
+      const removedEmails = existingDesignatedAdmins.filter((email) => !requestedDesignatedAdmins.includes(email));
+
+      if (!existingDesignatedAdmins.includes(actorEmail)) {
+        return res.status(403).json({ success: false, message: 'Only a designated admin can change designated admin access' });
+      }
+
+      if (removedEmails.some((email) => email !== actorEmail)) {
+        return res.status(403).json({ success: false, message: 'Designated admins can only revoke their own designation' });
+      }
+
+      if (!requestedDesignatedAdmins.length) {
+        return res.status(400).json({ success: false, message: 'At least one designated admin is required' });
+      }
+
+      body.designated_admin_emails = requestedDesignatedAdmins;
+    }
     const resolvedLogoUrl = body.logo_url ? await resolveMediaValue(body.logo_url, 'image') : undefined;
     const resolvedHeroImages = Array.isArray(body.hero_images) ? await resolveMediaList(body.hero_images) : undefined;
     const resolvedCategories = Array.isArray(body.categories)
