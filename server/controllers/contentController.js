@@ -60,10 +60,18 @@ const resolveMediaList = async (values = []) => {
   return resolved;
 };
 
-const normalizeContent = (doc) => ({
-  ...buildDefaultContent(),
-  ...(doc ? (doc.toObject ? doc.toObject() : doc) : {}),
-});
+const normalizeContent = (doc) => {
+  const content = {
+    ...buildDefaultContent(),
+    ...(doc ? (doc.toObject ? doc.toObject() : doc) : {}),
+  };
+
+  if (!Array.isArray(content.designated_admin_emails) || !content.designated_admin_emails.length) {
+    content.designated_admin_emails = [...DEFAULT_DESIGNATED_ADMIN_EMAILS];
+  }
+
+  return content;
+};
 
 export const getSiteContent = async (req, res) => {
   try {
@@ -71,6 +79,9 @@ export const getSiteContent = async (req, res) => {
 
     if (!content) {
       content = await siteContentModel.create(buildDefaultContent());
+    } else if (!Array.isArray(content.designated_admin_emails) || !content.designated_admin_emails.length) {
+      content.designated_admin_emails = [...DEFAULT_DESIGNATED_ADMIN_EMAILS];
+      await content.save();
     }
 
     return res.json({ success: true, content: normalizeContent(content) });

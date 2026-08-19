@@ -127,7 +127,9 @@ export const Admin = () => {
   const [siteContent, setSiteContent] = useState(null);
   const [settingsSection, setSettingsSection] = useState('brand');
   const [designatedAdminInput, setDesignatedAdminInput] = useState('');
-  const designatedAdminEmails = siteContent?.designated_admin_emails || [];
+  const designatedAdminEmails = siteContent?.designated_admin_emails?.length
+    ? siteContent.designated_admin_emails
+    : ['poptonydm@gmail.com'];
   const currentUserEmail = user?.email?.trim().toLowerCase();
   const canManageAdmins = designatedAdminEmails.some((email) => email.trim().toLowerCase() === currentUserEmail);
 

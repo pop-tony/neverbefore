@@ -43,6 +43,7 @@ export const defaultSiteContent = {
   admin_access_title: 'Access Denied',
   admin_access_message: 'You need administrator privileges to access this page.',
   admin_access_note: 'Contact Madam Jozy to request admin access.',
+  designated_admin_emails: ['poptonydm@gmail.com'],
   categories: [],
 };
 
