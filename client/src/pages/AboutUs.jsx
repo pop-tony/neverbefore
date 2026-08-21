@@ -4,7 +4,7 @@ import { Sparkles, Users, Truck, ShieldCheck } from 'lucide-react';
 
 export default function AboutUs() {
   return (
-    <div className="min-h-screen bg-white text-zinc-900 dark:bg-black dark:text-white">
+    <div className="min-h-screen bg-[#FCFAF6] text-zinc-900 dark:bg-black dark:text-white">
       {/* Hero */}
       <div className="relative overflow-hidden bg-gradient-to-br from-[#C5A059]/10 to-[#E8D5B5]/10 px-4 py-32 dark:from-zinc-900 dark:to-black">
         <div className="mx-auto max-w-4xl text-center">
@@ -13,7 +13,7 @@ export default function AboutUs() {
             animate={{ opacity: 1, y: 0 }}
             className="mb-16 text-center"
           >
-            <h1 className="mb-4 text-5xl font-black tracking-tight">About NEVER BEFORE COSMETIC</h1>
+            <h1 className="mb-4 font-serif text-5xl font-semibold tracking-tight">About NEVER BEFORE COSMETIC</h1>
             <p className="text-lg text-zinc-600 dark:text-zinc-400">
               Gold-standard rituals for skin that glows like never before
             </p>
@@ -23,9 +23,9 @@ export default function AboutUs() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="mb-16 rounded-2xl bg-zinc-50 p-8 dark:bg-zinc-900"
+            className="mb-16 rounded-[1.75rem] border border-zinc-200/60 bg-white/85 p-8 text-left shadow-[0_18px_44px_rgba(24,24,27,0.08)] dark:border-zinc-800 dark:bg-zinc-900"
           >
-            <h2 className="mb-4 text-2xl font-bold">Our Story</h2>
+            <h2 className="mb-4 font-serif text-3xl font-semibold">Our Story</h2>
             <div className="space-y-4 text-zinc-700 dark:text-zinc-300">
               <p>
                 NEVER BEFORE COSMETIC was born in Accra from a simple belief: every woman deserves to feel 
@@ -70,7 +70,7 @@ export default function AboutUs() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 + i * 0.1 }}
-                className="rounded-2xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900"
+                className="rounded-[1.4rem] border border-zinc-200 bg-white p-6 text-left shadow-[0_12px_30px_rgba(24,24,27,0.05)] dark:border-zinc-800 dark:bg-zinc-900"
               >
                 <item.icon className="mb-4 h-8 w-8 text-[#C5A059]" />
                 <h3 className="mb-2 text-lg font-bold">{item.title}</h3>

@@ -25,11 +25,11 @@ export default function Lookbook() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-white dark:bg-black">
+    <div className="min-h-screen bg-[#FCFAF6] dark:bg-black">
       <div className="mx-auto max-w-7xl px-4 py-16">
         <div className="mb-16 text-center">
-          <p className="mb-2 text-sm uppercase tracking-[0.3em] text-[#C5A059]">NEVER BEFORE COSMETIC</p>
-          <h1 className="mb-4 text-5xl font-black md:text-6xl">Collections</h1>
+          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.22em] text-[#C5A059]">NEVER BEFORE COSMETIC</p>
+          <h1 className="mb-4 font-serif text-5xl font-semibold md:text-6xl">Collections</h1>
           <p className="text-lg text-zinc-600 dark:text-zinc-400">Curated rituals for the modern muse</p>
         </div>
 
@@ -40,7 +40,7 @@ export default function Lookbook() {
               onClick={() => navigate(col.link)}
               className="group cursor-pointer overflow-hidden"
             >
-              <div className="aspect-[4/5] overflow-hidden bg-zinc-100 dark:bg-zinc-900">
+              <div className="aspect-[4/5] overflow-hidden rounded-[1.4rem] border border-zinc-200 bg-zinc-100 shadow-[0_14px_34px_rgba(24,24,27,0.08)] dark:border-zinc-800 dark:bg-zinc-900">
                 <img
                   src={col.image}
                   alt={col.title}
@@ -48,7 +48,7 @@ export default function Lookbook() {
                 />
               </div>
               <div className="pt-6">
-                <h3 className="mb-2 text-2xl font-black">{col.title}</h3>
+                <h3 className="mb-2 font-serif text-2xl font-semibold">{col.title}</h3>
                 <p className="text-zinc-600 dark:text-zinc-400">{col.desc}</p>
               </div>
             </div>

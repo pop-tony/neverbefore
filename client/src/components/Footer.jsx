@@ -16,20 +16,20 @@ export default function Footer() {
   return (
     <footer className="border-t border-zinc-200 bg-zinc-50 text-zinc-900 dark:border-zinc-800 dark:bg-black dark:text-white">
       <div className="mx-auto max-w-7xl px-4 py-12">
-        <div className="flex items-center gap-4">
+        <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
           <img
             src={content?.logo_url || logo}
             alt="Never Before Cosmetics logo"
-            className="h-16 w-16 rounded-full border border-[#C5A059]/20 bg-white object-cover p-2 shadow-sm"
+            className="h-20 w-20 rounded-full border-2 border-[#C5A059]/30 bg-white object-cover p-2 shadow-[0_16px_34px_rgba(197,160,89,0.22)] sm:h-24 sm:w-24"
           />
           <div>
-            <h3 className="mb-2 text-2xl font-black">{(content?.brand_name || 'NEVER BEFORE').toUpperCase()} <span className="text-[#C5A059]">COSMETIC</span></h3>
-            <p className="text-sm text-zinc-600 dark:text-zinc-400">{content?.brand_tagline || 'Gold-standard rituals for skin that glows like never before.'}</p>
+            <h3 className="mb-2 font-serif text-3xl font-semibold">{(content?.brand_name || 'NEVER BEFORE').toUpperCase()} <span className="text-[#C5A059]">COSMETIC</span></h3>
+            <p className="max-w-2xl text-sm text-zinc-600 dark:text-zinc-400">{content?.brand_tagline || 'Gold-standard rituals for skin that glows like never before.'}</p>
           </div>
         </div>
-        <div className="grid grid-cols-3 gap-8 mt-3">
+        <div className="mt-8 grid grid-cols-1 gap-8 sm:grid-cols-2 md:grid-cols-3">
           <div>
-            <h4 className="mb-4 font-bold">Shop</h4>
+            <h4 className="mb-4 text-sm font-bold uppercase tracking-[0.18em] text-zinc-500">Shop</h4>
             <ul className="space-y-2 text-sm text-zinc-600 dark:text-zinc-400">
               <li><Link to="/shop?category=Skincare" className="transition hover:text-black dark:hover:text-white">Skincare</Link></li>
               <li><Link to="/shop?category=Makeup" className="transition hover:text-black dark:hover:text-white">Makeup</Link></li>
@@ -39,7 +39,7 @@ export default function Footer() {
           </div>
 
           <div>
-            <h4 className="mb-4 font-bold">Support</h4>
+            <h4 className="mb-4 text-sm font-bold uppercase tracking-[0.18em] text-zinc-500">Support</h4>
             <ul className="space-y-2 text-sm text-zinc-600 dark:text-zinc-400">
               <li><Link to="/contact" className="transition hover:text-black dark:hover:text-white">{content?.navigation_contact || 'Contact Us'}</Link></li>
               <li><Link to="/terms" className="transition hover:text-black dark:hover:text-white">Shipping & Returns</Link></li>
@@ -48,7 +48,7 @@ export default function Footer() {
           </div>
 
           <div>
-            <h4 className="mb-4 font-bold">Company</h4>
+            <h4 className="mb-4 text-sm font-bold uppercase tracking-[0.18em] text-zinc-500">Company</h4>
             <ul className="space-y-2 text-sm text-zinc-600 dark:text-zinc-400">
               <li><Link to="/about" className="transition hover:text-black dark:hover:text-white">Our Story</Link></li>
               <li><Link to="/terms" className="transition hover:text-black dark:hover:text-white">Terms of Service</Link></li>

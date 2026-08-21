@@ -4,12 +4,13 @@ import { AuthProvider } from './context/AuthContext'
 import Footer from './components/Footer'
 import NavBar from './components/NavBar'
 import ShopPage from './pages/ShopPage' 
-import { Route, Routes } from 'react-router-dom'
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import Home from './pages/Home'
 import Cart from './pages/Cart'
 import { OrderProvider } from './context/OrderContext'
 import { Admin } from './pages/Admin'
 import { ProtectedRoute } from './components/ProtectedRoute'
+import { useAuth } from './context/AuthContext'
 import OrderDetails from './pages/OrderDetails'
 import ProductDetails from './pages/ProductDetails' 
 import Lookbook from './components/Lookbook'
@@ -22,6 +23,15 @@ import PrivacyPolicy from './pages/PrivacyPolicy'
 import AuthPage from './pages/AuthPage'
 
 function AppContent() {
+  const location = useLocation();
+  const { isAuthenticated, isAdmin, adminStoreModeEnabled, loading } = useAuth();
+  const adminLockedToDashboard = isAuthenticated && isAdmin && !adminStoreModeEnabled;
+  const showShopUi = !isAdmin || adminStoreModeEnabled;
+
+  if (!loading && adminLockedToDashboard && location.pathname !== '/admin') {
+    return <Navigate to="/admin" replace />;
+  }
+
   return (
     <OrderProvider>
       <div className="flex min-h-screen flex-col bg-white dark:bg-black">
@@ -44,7 +54,7 @@ function AppContent() {
           <Route path='/privacy' element={<PrivacyPolicy />} />
           </Routes>
         </main>
-        <Footer />
+        {showShopUi && <Footer />}
       </div>
     </OrderProvider>
   )

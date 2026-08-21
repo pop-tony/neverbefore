@@ -12,12 +12,12 @@ export default function ProductCard({ product }) {
     <div className="group relative">
       <div
         onClick={() => navigate(`/product/${id}`)}
-        className="aspect-[3/4] w-full cursor-pointer overflow-hidden bg-zinc-100 dark:bg-zinc-900"
+        className="aspect-[3/4] w-full cursor-pointer overflow-hidden rounded-[1.35rem] border border-zinc-200/80 bg-zinc-100 shadow-[0_12px_30px_rgba(24,24,27,0.08)] transition duration-300 group-hover:-translate-y-1 group-hover:shadow-[0_22px_44px_rgba(24,24,27,0.13)] dark:border-zinc-800 dark:bg-zinc-900"
       >
         <img
           src={images[0]}
           alt={name}
-          className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
+          className="h-full w-full object-cover transition duration-700 group-hover:scale-[1.07]"
         />
         {condition !== 'New' && (
           <div className="absolute left-3 top-3 rounded-full bg-black/80 px-3 py-1 text-xs font-bold text-white backdrop-blur-md">
@@ -37,15 +37,15 @@ export default function ProductCard({ product }) {
         <Heart className={`h-4 w-4 ${isLiked ? 'fill-[#C5A059] text-[#C5A059]' : 'text-zinc-700 dark:text-zinc-300'}`} />
       </button>
 
-      <div className="mt-4">
-        <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">{category}</p>
+      <div className="mt-4 px-0.5">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-500">{category}</p>
         <h3
           onClick={() => navigate(`/product/${id}`)}
-          className="mt-1 cursor-pointer text-sm font-semibold hover:text-[#C5A059] line-clamp-1"
+          className="mt-1 cursor-pointer text-base font-semibold leading-tight hover:text-[#C5A059] line-clamp-1"
         >
           {name}
         </h3>
-        <p className="mt-1 text-lg font-bold">₵{price}</p>
+        <p className="mt-1 text-lg font-bold text-zinc-900 dark:text-zinc-100">₵{price}</p>
       </div>
     </div>
   );

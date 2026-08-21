@@ -91,21 +91,22 @@ export default function AuthPage() {
   const inputClass = "w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 pr-12 pl-11 text-sm text-zinc-900 placeholder-zinc-400 transition focus:border-[#C5A059] focus:outline-none focus:ring-2 focus:ring-[#C5A059]/20 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white dark:placeholder-zinc-500";
 
   return (
-    <div className="flex min-h-[calc(100vh-160px)] items-center justify-center px-4 py-12">
-      <div className="w-full max-w-md">
+    <div className="relative flex min-h-[calc(100vh-160px)] items-center justify-center overflow-hidden px-4 py-12">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_20%,rgba(197,160,89,0.18),transparent_28%),radial-gradient(circle_at_80%_0%,rgba(0,0,0,0.05),transparent_30%)] dark:bg-[radial-gradient(circle_at_15%_20%,rgba(197,160,89,0.16),transparent_28%),radial-gradient(circle_at_80%_0%,rgba(255,255,255,0.04),transparent_30%)]" />
+      <div className="relative w-full max-w-md rounded-[2rem] border border-zinc-200/70 bg-white/85 p-6 shadow-[0_28px_70px_rgba(24,24,27,0.1)] backdrop-blur-sm dark:border-zinc-800 dark:bg-zinc-950/75 sm:p-8">
         {/* Header */}
         <div className="mb-8 text-center">
           <img
             src={logo}
             alt="Never Before Cosmetics logo"
-            className="mx-auto mb-5 h-28 w-28 rounded-full border-4 border-white bg-white object-cover p-2 shadow-[0_12px_30px_rgba(0,0,0,0.12)]"
+            className="mx-auto mb-5 h-32 w-32 rounded-full border-4 border-white bg-white object-cover p-2 shadow-[0_18px_42px_rgba(197,160,89,0.26)]"
           />
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-zinc-500 dark:text-zinc-400">NEVER BEFORE</p>
-          <h1 className="mt-2 font-serif text-4xl font-light text-zinc-900 dark:text-white">
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-zinc-500 dark:text-zinc-400">NEVER BEFORE</p>
+          <h1 className="mt-2 font-serif text-4xl font-medium text-zinc-900 dark:text-white">
             Cosmetic <span className="text-[#C5A059]">Atelier</span>
           </h1>
           <p className="mt-3 text-sm text-zinc-500 dark:text-zinc-400">
-            {mode === 'login' ? 'Sign in to your account' : 'Create your account'}
+            {mode === 'login' ? 'Welcome back. Your rituals are waiting.' : 'Create your account and start your glow routine.'}
           </p>
         </div>
 

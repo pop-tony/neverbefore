@@ -1,5 +1,5 @@
 
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Manrope:wght@300..800&display=swap');
 
 @import "tailwindcss";
 
@@ -7,6 +7,8 @@
 
 :root {
   color-scheme: light;
+  --brand-gold: #c5a059;
+  --brand-ivory: #f7f4ee;
 }
 
 * {
@@ -20,13 +22,27 @@ html {
 }
 
 body {
-  background: #f7f4ee;
+  background:
+    radial-gradient(circle at 8% 8%, rgba(197, 160, 89, 0.1), transparent 24%),
+    radial-gradient(circle at 88% 0%, rgba(0, 0, 0, 0.04), transparent 27%),
+    #f7f4ee;
   color: #18181b;
 }
 
 body.dark {
-  background: #09090b;
+  background:
+    radial-gradient(circle at 8% 8%, rgba(197, 160, 89, 0.14), transparent 22%),
+    radial-gradient(circle at 88% 0%, rgba(255, 255, 255, 0.04), transparent 24%),
+    #09090b;
   color: #f4f4f5;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: "Cormorant Garamond", serif;
+  letter-spacing: 0.01em;
 }
 
 @theme {

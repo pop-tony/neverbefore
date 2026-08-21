@@ -3,10 +3,12 @@ import React from 'react';
 import { createContext, useContext, useState, useEffect } from 'react';
 
 const AuthContext = createContext();
+const ADMIN_STORE_MODE_KEY = 'nb_admin_store_mode_enabled';
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [adminStoreModeEnabled, setAdminStoreModeEnabled] = useState(false);
   const configuredBase = (import.meta.env.VITE_BACKEND_URL || import.meta.env.VITE_API_URL || '/api').replace(/\/+$/, '');
   const backendUrl = configuredBase.endsWith('/api') ? configuredBase : `${configuredBase}/api`;
 
@@ -26,6 +28,25 @@ export function AuthProvider({ children }) {
     };
     checkAuth();
   }, [backendUrl]);
+
+  useEffect(() => {
+    if (user?.isAdmin === true) {
+      const savedMode = window.localStorage.getItem(ADMIN_STORE_MODE_KEY) === 'true';
+      setAdminStoreModeEnabled(savedMode);
+      return;
+    }
+
+    setAdminStoreModeEnabled(false);
+  }, [user]);
+
+  const toggleAdminStoreMode = () => {
+    if (user?.isAdmin !== true) return;
+    setAdminStoreModeEnabled((prev) => {
+      const nextValue = !prev;
+      window.localStorage.setItem(ADMIN_STORE_MODE_KEY, String(nextValue));
+      return nextValue;
+    });
+  };
 
   const login = async (identifier, password) => {
     const res = await axios.post(`${backendUrl}/auth/login`, {
@@ -62,6 +83,8 @@ export function AuthProvider({ children }) {
       await axios.post(`${backendUrl}/auth/logout`, {}, { withCredentials: true });
     } finally {
       setUser(null);
+      setAdminStoreModeEnabled(false);
+      window.localStorage.removeItem(ADMIN_STORE_MODE_KEY);
     }
   };
 
@@ -75,6 +98,8 @@ export function AuthProvider({ children }) {
       logout,
       isAuthenticated: !!user,
       isAdmin: user?.isAdmin === true,
+      adminStoreModeEnabled,
+      toggleAdminStoreMode,
     }}>
       {children}
     </AuthContext.Provider>
